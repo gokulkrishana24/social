@@ -40,3 +40,5 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 .idea/
+
+ORGANIZER_CREDENTIALS_AND_SECRETS.md
