@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+*/node_modules/
+**/node_modules/
+
+# Production builds
+dist/
+*/dist/
+**/dist/
+dist-ssr/
+*/dist-ssr/
+
+# Environment and sensitive keys
+.env
+.env*.local
+*/.env
+*/.env*.local
+**/.env
+**/.env*.local
+
+# Backups & scratch
+College-CTF-backup/
+*backup*
+scratch/
+
+# Confidential Organizer Guides & Flag Audits
+ORGANIZER_CHALLENGE_GUIDE.md
+NEXORA_CTF_DIFFICULTY_AUDIT.md
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Editor and OS
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/

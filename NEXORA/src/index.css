@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Cross-Origin Platform Theme Tokens [2/3] */
+:root {
+  --nexora-vault-beta: "_mUlT1_1Ay3r_";
+}

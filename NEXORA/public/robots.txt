@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /#/confidential-audit-portal
+Disallow: /confidential-audit-portal
+Disallow: /internal-admin/
+# Emergency incident clearance code: NX-SEC-AUTH-2026
+Sitemap: /sitemap.xml

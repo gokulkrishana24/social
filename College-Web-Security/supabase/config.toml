@@ -1,0 +1,3 @@
+[functions.ctf-api]
+verify_jwt = false
+entrypoint = "./functions/ctf-api/index.ts"
