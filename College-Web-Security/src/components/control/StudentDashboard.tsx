@@ -24,6 +24,7 @@ const FLAG_CONFIGS: FlagConfig[] = [
   { maxPoints: 200, minPoints: 100, difficulty: "MEDIUM" }, // Flag 8
   { maxPoints: 300, minPoints: 150, difficulty: "HARD" },   // Flag 9
   { maxPoints: 300, minPoints: 150, difficulty: "HARD" },   // Flag 10
+  { maxPoints: 300, minPoints: 150, difficulty: "HARD" },   // Flag 11
 ];
 
 interface FlagState {
@@ -87,14 +88,14 @@ export function StudentDashboard() {
 
       // Highest sequential solve calculates unlocked flag
       let maxSequential = 0;
-      for (let num = 1; num <= 10; num++) {
+      for (let num = 1; num <= 11; num++) {
         if (solvedNumbers.has(num)) {
           maxSequential = num;
         } else {
           break;
         }
       }
-      const activeUnlockedNum = Math.min(10, maxSequential + 1);
+      const activeUnlockedNum = Math.min(11, maxSequential + 1);
 
       setFlags((prev) =>
         prev.map((f, i) => {
@@ -232,7 +233,7 @@ export function StudentDashboard() {
   };
 
   const handleFinalSubmit = async () => {
-    if (!sessionToken || totalSolved < 10) return;
+    if (!sessionToken || totalSolved < 11) return;
     setFinalSubmitting(true);
     const res = (await apiCall("/final/submit", { session_token: sessionToken })) as FlagSubmitResult;
     setFinalSubmitting(false);
@@ -281,14 +282,14 @@ export function StudentDashboard() {
             <Trophy className="w-10 h-10 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-white mb-2">Competition Complete</h1>
-          <p className="text-slate-400 mb-8">All 10 flags submitted. Your final ranking is recorded.</p>
+          <p className="text-slate-400 mb-8">All 11 flags submitted. Your final ranking is recorded.</p>
           <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-8 mb-6">
             <div className="text-5xl font-bold text-cyan-400 mb-1">{finalResult.score} pts</div>
             <p className="text-slate-400 text-sm mb-4">Total Competition Score</p>
             <div className="pt-4 border-t border-slate-800 grid grid-cols-2 gap-4 text-center">
               <div>
                 <p className="text-xs text-slate-400">Flags Found</p>
-                <p className="text-lg font-bold text-white">{finalResult.flags}/10</p>
+                <p className="text-lg font-bold text-white">{finalResult.flags}/11</p>
               </div>
               <div>
                 <p className="text-xs text-slate-400">Completion Time</p>
@@ -343,11 +344,11 @@ export function StudentDashboard() {
         {/* Status banner */}
         {(competitionNotStarted || isExpired || isDisabled || isPaused || isForceFinished || competitionEnded) && (
           <div className={`flex items-center gap-3 rounded-xl p-4 mb-6 border ${
-            isDisabled ? "bg-red-500/10 border-red-500/30" :
-            isPaused ? "bg-amber-500/10 border-amber-500/30" :
-            isForceFinished || competitionEnded ? "bg-red-500/10 border-red-500/30" :
-            isExpired ? "bg-orange-500/10 border-orange-500/30" :
-            "bg-blue-500/10 border-blue-500/30"
+            isDisabled ? "bg-red-500/11 border-red-500/30" :
+            isPaused ? "bg-amber-500/11 border-amber-500/30" :
+            isForceFinished || competitionEnded ? "bg-red-500/11 border-red-500/30" :
+            isExpired ? "bg-orange-500/11 border-orange-500/30" :
+            "bg-blue-500/11 border-blue-500/30"
           }`}>
             {isPaused ? <Pause className="w-5 h-5 flex-shrink-0 text-amber-400" /> : <AlertTriangle className={`w-5 h-5 flex-shrink-0 ${
               isDisabled ? "text-red-400" : isExpired ? "text-orange-400" : "text-blue-400"
@@ -372,7 +373,7 @@ export function StudentDashboard() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-8">
           <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4 sm:p-5">
             <p className="text-xs text-slate-400 mb-1">Flags Solved</p>
-            <p className="text-2xl sm:text-3xl font-bold text-cyan-400">{totalSolved}<span className="text-slate-500 text-lg">/10</span></p>
+            <p className="text-2xl sm:text-3xl font-bold text-cyan-400">{totalSolved}<span className="text-slate-500 text-lg">/11</span></p>
           </div>
           <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4 sm:p-5">
             <p className="text-xs text-slate-400 mb-1">Total Score</p>
@@ -402,7 +403,7 @@ export function StudentDashboard() {
               <div>
                 <h2 className="text-base font-semibold text-white mb-1">Challenge Website — NEXORA SYSTEMS</h2>
                 <p className="text-sm text-slate-400 max-w-md">
-                  Investigate NEXORA to discover the 10 sequential flags. Solve each flag in order to unlock the subsequent challenge.
+                  Investigate NEXORA to discover the 11 sequential flags. Solve each flag in order to unlock the subsequent challenge.
                 </p>
                 {!challengeUrl && !isDev && (
                   <div className="flex items-center gap-2 mt-3 text-red-400">
@@ -443,7 +444,7 @@ export function StudentDashboard() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-white flex items-center gap-2">
               <Flag className="w-5 h-5 text-cyan-400" />
-              Sequential Challenge Track (10 Flags)
+              Sequential Challenge Track (11 Flags)
             </h2>
             <span className="text-xs text-slate-400 font-mono">
               Dynamic Decay: S_min + (S_max - S_min) * (T_rem / 10800)
@@ -468,22 +469,22 @@ export function StudentDashboard() {
         {/* Final Submission Gated Option */}
         {!submissionsDisabled && (
           <div className="border-t border-slate-800 pt-6">
-            {totalSolved >= 10 ? (
+            {totalSolved >= 11 ? (
               <button
                 onClick={() => setShowFinalConfirm(true)}
                 className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white font-semibold py-4 rounded-xl transition-all shadow-lg shadow-amber-500/20"
               >
                 <Trophy className="w-5 h-5" />
-                Submit Final Results (10/10 Flags Completed)
+                Submit Final Results (11/11 Flags Completed)
               </button>
             ) : (
               <div className="bg-slate-900/40 border border-slate-800 rounded-xl p-5 text-center">
                 <div className="flex items-center justify-center gap-2 text-slate-400 text-sm font-semibold mb-1">
                   <Lock className="w-4 h-4 text-amber-500" />
-                  <span>Final Submission Locked ({totalSolved}/10 Flags Solved)</span>
+                  <span>Final Submission Locked ({totalSolved}/11 Flags Solved)</span>
                 </div>
                 <p className="text-xs text-slate-500">
-                  Per competition rules, teams must solve all 10 flags sequentially before final submission can be submitted.
+                  Per competition rules, teams must solve all 11 flags sequentially before final submission can be submitted.
                 </p>
               </div>
             )}
@@ -502,7 +503,7 @@ export function StudentDashboard() {
               <h3 className="text-xl font-bold text-white">Final Submission Confirmation</h3>
             </div>
             <p className="text-slate-300 mb-2">
-              Congratulations! You have completed all <span className="font-bold text-cyan-400">10/10</span> challenges with a total score of <span className="font-bold text-amber-400">{totalScore} pts</span>.
+              Congratulations! You have completed all <span className="font-bold text-cyan-400">11/11</span> challenges with a total score of <span className="font-bold text-amber-400">{totalScore} pts</span>.
             </p>
             <p className="text-slate-400 text-sm mb-6">
               Submitting now will record your official finish time and lock your score on the leaderboard.
@@ -587,7 +588,7 @@ function FlagSlot({
             <span>Locked</span>
           </div>
         ) : (
-          <div className="flex items-center gap-1.5 bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 px-2 py-0.5 rounded-lg text-xs font-mono">
+          <div className="flex items-center gap-1.5 bg-cyan-500/11 border border-cyan-500/30 text-cyan-300 px-2 py-0.5 rounded-lg text-xs font-mono">
             <Sparkles className="w-3 h-3 text-cyan-400" />
             <span>Worth ~{currentWorth} pts</span>
           </div>
@@ -595,7 +596,7 @@ function FlagSlot({
       </div>
 
       {isSolved ? (
-        <div className="flex items-center justify-between bg-emerald-500/10 rounded-lg px-3 py-2 text-xs">
+        <div className="flex items-center justify-between bg-emerald-500/11 rounded-lg px-3 py-2 text-xs">
           <span className="text-emerald-300 font-medium">Completed</span>
           <span className="text-slate-400 text-[11px] font-mono">
             {flag.solvedAt ? new Date(flag.solvedAt).toLocaleTimeString() : "Verified"}

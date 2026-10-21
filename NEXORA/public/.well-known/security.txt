@@ -1,0 +1,6 @@
+Contact: mailto:security@nexorasys.com
+Expires: 2027-12-31T23:59:00.000Z
+Policy: https://nexorasys.com/#/support
+Preferred-Languages: en
+# Legacy configuration snapshots are archived for auditors:
+Acknowledgments: /archive/nexora-config.b64

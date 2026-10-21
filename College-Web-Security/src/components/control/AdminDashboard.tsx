@@ -2,16 +2,16 @@ import { useState, useEffect, useCallback } from "react";
 import {
   LogOut, Users, Activity, CheckCircle2, Clock, Play, Square, FileDown,
   Shield, Loader2, ChevronRight, X, ScrollText, Ban, RotateCcw, UserPlus,
-  AlertTriangle, Flag, Trophy, Pause, Zap, Unlock, History,
+  AlertTriangle, Flag, Trophy, Pause, Zap, Unlock, History, ShieldCheck,
 } from "lucide-react";
 import { useAdminAuth } from "@/lib/admin-auth";
 import { useRouter } from "@/lib/router";
 import {
-  apiCall, type DashboardResult, type TeamDetailResult,
+  apiCall, type AccessRequest, type DashboardResult, type TeamDetailResult,
   type AuditLogResult, type ExportResult, type RunHistoryResult, type RunHistoryEntry,
 } from "@/lib/api";
 
-type View = "overview" | "logs" | "test" | "history";
+type View = "overview" | "approvals" | "timeline" | "hints" | "logs" | "test" | "history";
 
 export function AdminDashboard() {
   const { sessionToken, logout } = useAdminAuth();
@@ -157,6 +157,9 @@ export function AdminDashboard() {
         <div className="flex gap-2 mb-6 border-b border-slate-800 pb-px">
           {([
             { id: "overview", label: "Overview", icon: Users },
+            { id: "approvals", label: "Approvals", icon: ShieldCheck },
+            { id: "timeline", label: "Timeline", icon: Clock },
+            { id: "hints", label: "Hints", icon: Flag },
             { id: "history", label: "Run History", icon: History },
             { id: "logs", label: "Audit Logs", icon: ScrollText },
             { id: "test", label: "Test Mode", icon: UserPlus },
@@ -177,6 +180,10 @@ export function AdminDashboard() {
           })}
         </div>
 
+        {view === "approvals" && <ApprovalsPanel sessionToken={sessionToken} />}
+        {view === "timeline" && <TimelinePanel sessionToken={sessionToken} />}
+        {view === "hints" && <HintsPanel sessionToken={sessionToken} />}
+
         {view === "overview" && (
           <>
             {/* Competition status + controls */}
@@ -184,7 +191,7 @@ export function AdminDashboard() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    {run && <span className="text-xs font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">RUN #{run.run_number}</span>}
+                    {run && <span className="text-xs font-mono text-amber-400 bg-amber-500/11 px-2 py-0.5 rounded">RUN #{run.run_number}</span>}
                   </div>
                   <p className="text-xs text-slate-400 mb-1">Competition Status</p>
                   <div className="flex items-center gap-2">
@@ -327,7 +334,7 @@ export function AdminDashboard() {
                           </div>
                         </td>
                         <td className="px-5 py-3"><span className="text-sm font-mono font-bold text-amber-400">{t.total_score ?? 0} pts</span></td>
-                        <td className="px-5 py-3"><span className="text-sm font-mono text-cyan-400">{t.flags_solved}/10</span></td>
+                        <td className="px-5 py-3"><span className="text-sm font-mono text-cyan-400">{t.flags_solved}/11</span></td>
                         <td className="px-5 py-3 text-sm text-slate-300 hidden sm:table-cell">
                           {t.started_at ? new Date(t.started_at).toLocaleTimeString() : "—"}
                         </td>
@@ -573,7 +580,7 @@ function TeamDetailModal({
               </div>
               <div className="bg-slate-800/50 rounded-lg p-3">
                 <p className="text-xs text-slate-400">Flags Solved</p>
-                <p className="text-sm font-bold text-cyan-400">{detail.total_solved}/10</p>
+                <p className="text-sm font-bold text-cyan-400">{detail.total_solved}/11</p>
               </div>
               <div className="bg-slate-800/50 rounded-lg p-3">
                 <p className="text-xs text-slate-400">Created</p>
@@ -795,7 +802,7 @@ function TestModePanel({
                   <td className="px-5 py-3 text-sm text-slate-300">{t.team_name}</td>
                   <td className="px-5 py-3"><StatusBadge status={t.status} /></td>
                   <td className="px-5 py-3 text-sm font-mono font-bold text-amber-400">{t.total_score ?? 0} pts</td>
-                  <td className="px-5 py-3 text-sm font-mono text-cyan-400">{t.flags_solved}/10</td>
+                  <td className="px-5 py-3 text-sm font-mono text-cyan-400">{t.flags_solved}/11</td>
                   <td className="px-5 py-3 text-right">
                     <div className="flex gap-1 justify-end">
                       <button onClick={() => onView(t.id)} className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors">
@@ -822,7 +829,7 @@ function TestModePanel({
                 <X className="w-5 h-5" />
               </button>
             </div>
-            {error && <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-4"><p className="text-red-300 text-sm">{error}</p></div>}
+            {error && <div className="bg-red-500/11 border border-red-500/30 rounded-lg p-3 mb-4"><p className="text-red-300 text-sm">{error}</p></div>}
             <form onSubmit={handleCreate} className="space-y-4">
               <div>
                 <label className="block text-sm text-slate-300 mb-1.5">Team Code</label>
@@ -852,6 +859,160 @@ function TestModePanel({
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function ApprovalsPanel({ sessionToken }: { sessionToken: string | null }) {
+  const [requests, setRequests] = useState<AccessRequest[]>([]);
+  const [error, setError] = useState("");
+
+  const load = useCallback(async () => {
+    const res = await apiCall("/admin/access-requests", { session_token: sessionToken });
+    if (res.success) setRequests((res.requests as AccessRequest[]) || []);
+    else setError(res.error || "Failed to load requests.");
+  }, [sessionToken]);
+
+  useEffect(() => {
+    load();
+    const t = setInterval(load, 4000);
+    return () => clearInterval(t);
+  }, [load]);
+
+  const decide = async (id: string, approve: boolean) => {
+    const res = await apiCall("/admin/decide-access", { session_token: sessionToken, request_id: id, approve });
+    setError(res.success ? "" : res.error || "Failed.");
+    load();
+  };
+
+  const pending = requests.filter((r) => r.status === "PENDING");
+  const done = requests.filter((r) => r.status !== "PENDING");
+
+  const row = (r: AccessRequest) => (
+    <div key={r.id} className="flex flex-wrap items-center gap-3 bg-slate-900/60 border border-slate-800 rounded-lg p-4">
+      <div className="flex-1 min-w-[220px]">
+        <p className="text-white font-medium">
+          {r.kind === "REGISTRATION" ? "New team: " : ""}{r.team_name}{" "}
+          <span className="text-slate-500 text-xs">({r.username}{r.team_code ? ` / ${r.team_code}` : ""})</span>
+        </p>
+        <p className="text-xs text-slate-400 mt-1">
+          {r.kind === "REGISTRATION" ? "Team registration" : r.had_active_session ? "Session takeover (team is logged in elsewhere)" : "New device"}
+          {" · "}device {r.device_id} · {r.ip_address || "unknown IP"} · {new Date(r.created_at).toLocaleTimeString()}
+        </p>
+        <p className="text-xs text-slate-500 mt-0.5 truncate max-w-xl">{r.device_label}</p>
+      </div>
+      {r.status === "PENDING" ? (
+        <div className="flex gap-2">
+          <button onClick={() => decide(r.id, true)} className="px-3 py-1.5 text-sm rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white">Approve</button>
+          <button onClick={() => decide(r.id, false)} className="px-3 py-1.5 text-sm rounded-lg bg-red-600/80 hover:bg-red-500 text-white">Deny</button>
+        </div>
+      ) : (
+        <span className="text-xs text-slate-400">{r.status}</span>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="space-y-3">
+      {error && <p className="text-red-300 text-sm">{error}</p>}
+      <h2 className="text-white font-semibold">Pending ({pending.length})</h2>
+      {pending.length === 0 && <p className="text-slate-500 text-sm">No requests waiting.</p>}
+      {pending.map(row)}
+      {done.length > 0 && <h2 className="text-slate-400 font-semibold pt-4">Recent decisions</h2>}
+      {done.map(row)}
+    </div>
+  );
+}
+
+interface HintRow { flag_number: number; level: number; variant: number; hint_text: string }
+const HINT_LEVELS = ["", "Very high-level (hardest)", "High-level", "Medium", "Low-level", "Closest (near-solution)"];
+
+function HintsPanel({ sessionToken }: { sessionToken: string | null }) {
+  const [hints, setHints] = useState<HintRow[]>([]);
+  const [flag, setFlag] = useState(1);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    apiCall("/admin/hints", { session_token: sessionToken }).then((res) => {
+      if (res.success) setHints((res.hints as HintRow[]) || []);
+      else setError(res.error || "Failed to load hints.");
+    });
+  }, [sessionToken]);
+
+  const rows = hints.filter((h) => h.flag_number === flag);
+  return (
+    <div className="space-y-4">
+      <p className="text-slate-400 text-sm">Organizer-only. Release level 1 first and move toward level 5 as a team struggles. Each level has two variants (A/B) with a different angle.</p>
+      <div className="flex flex-wrap gap-2">
+        {Array.from({ length: 11 }, (_, i) => i + 1).map((n) => (
+          <button key={n} onClick={() => setFlag(n)}
+            className={`px-3 py-1.5 rounded-lg text-sm ${flag === n ? "bg-amber-500 text-slate-900" : "bg-slate-800 text-slate-300 hover:bg-slate-700"}`}>
+            Flag {n}
+          </button>
+        ))}
+      </div>
+      {error && <p className="text-red-300 text-sm">{error}</p>}
+      {[1, 2, 3, 4, 5].map((lvl) => (
+        <div key={lvl} className="bg-slate-900/60 border border-slate-800 rounded-lg p-4">
+          <p className="text-amber-400 text-sm font-semibold mb-2">Level {lvl} - {HINT_LEVELS[lvl]}</p>
+          {rows.filter((h) => h.level === lvl).map((h) => (
+            <p key={h.variant} className="text-slate-200 text-sm mb-1">
+              <span className="text-slate-500 mr-2">{h.variant === 1 ? "A" : "B"}</span>{h.hint_text}
+            </p>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+interface SolveRow {
+  team_code: string; team_name: string; flag_number: number; solved_at: string; points_awarded: number;
+  seconds_since_start: number | null; seconds_since_prev: number | null; wrong_attempts: number;
+}
+const fmtDur = (s: number | null) => (s == null ? "-" : `${Math.floor(s / 60)}m ${String(s % 60).padStart(2, "0")}s`);
+
+function TimelinePanel({ sessionToken }: { sessionToken: string | null }) {
+  const [solves, setSolves] = useState<SolveRow[]>([]);
+  const [error, setError] = useState("");
+
+  const load = useCallback(async () => {
+    const res = await apiCall("/admin/solve-timeline", { session_token: sessionToken });
+    if (res.success) setSolves(((res.solves as SolveRow[]) || []).slice().reverse());
+    else setError(res.error || "Failed to load timeline.");
+  }, [sessionToken]);
+
+  useEffect(() => {
+    load();
+    const t = setInterval(load, 10000);
+    return () => clearInterval(t);
+  }, [load]);
+
+  return (
+    <div className="space-y-3">
+      <p className="text-slate-400 text-sm">Newest first. "Since previous" is the time from the team's last solve (or their start) to this solve. Wrong attempts are counted per flag before the solve.</p>
+      {error && <p className="text-red-300 text-sm">{error}</p>}
+      <div className="overflow-x-auto bg-slate-900/60 border border-slate-800 rounded-lg">
+        <table className="w-full text-sm text-left">
+          <thead className="text-slate-400 border-b border-slate-800">
+            <tr>{["Solved at", "Team", "Flag", "Since start", "Since previous", "Wrong tries", "Points"].map((h) => <th key={h} className="px-3 py-2 font-medium">{h}</th>)}</tr>
+          </thead>
+          <tbody className="text-slate-200">
+            {solves.length === 0 && <tr><td colSpan={7} className="px-3 py-4 text-slate-500">No solves yet.</td></tr>}
+            {solves.map((r, i) => (
+              <tr key={i} className="border-b border-slate-800/60">
+                <td className="px-3 py-2">{new Date(r.solved_at).toLocaleTimeString()}</td>
+                <td className="px-3 py-2">{r.team_name} <span className="text-slate-500">{r.team_code}</span></td>
+                <td className="px-3 py-2">{r.flag_number}</td>
+                <td className="px-3 py-2">{fmtDur(r.seconds_since_start)}</td>
+                <td className="px-3 py-2">{fmtDur(r.seconds_since_prev)}</td>
+                <td className="px-3 py-2">{r.wrong_attempts}</td>
+                <td className="px-3 py-2">{r.points_awarded}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
