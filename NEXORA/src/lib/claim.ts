@@ -1,12 +1,18 @@
 // Auto-detect: any NEXORA{...} the team uncovers (or pastes/copies) on this site is claimed for them.
-// The team session arrives from the control dashboard over postMessage (NEXORA must be opened from there).
+// The team session arrives in the URL fragment (#link=...) when opened from the control dashboard.
 // The server decides which flag a value is; values that are not flags are ignored and never count as wrong.
 
-const CONTROL_ORIGIN = new URL(import.meta.env.VITE_CONTROL_SITE_URL || "http://localhost:5173").origin;
 const API = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ctf-api/flags/claim`;
 const TOKEN_KEY = "nx_team_session";
 const PENDING_KEY = "nx_found_pending";
 const FLAG_RE = /NEXORA\{[^}\s]{1,120}\}/g;
+
+// Runs at import, before the hash router reads the URL.
+if (location.hash.startsWith("#link=")) {
+  const token = decodeURIComponent(location.hash.slice(6));
+  if (token) sessionStorage.setItem(TOKEN_KEY, token);
+  history.replaceState(null, "", location.pathname + location.search + "#/home");
+}
 
 export type ClaimNotice = { kind: "ok" | "wait" | "bad" | "info"; text: string };
 type Listener = (n: ClaimNotice) => void;
@@ -14,6 +20,7 @@ type Listener = (n: ClaimNotice) => void;
 let notify: Listener = () => {};
 let linkedListener: (linked: boolean) => void = () => {};
 let flushing = false;
+let rerun = false; // a find arrived while a pass was running
 
 const getPending = (): string[] => JSON.parse(sessionStorage.getItem(PENDING_KEY) || "[]");
 const setPending = (v: string[]) => sessionStorage.setItem(PENDING_KEY, JSON.stringify([...new Set(v)]));
@@ -46,10 +53,14 @@ async function claim(value: string) {
 
 // Retries pending values until nothing new is solved, so finding flag 5 before 4 still credits both once 4 lands.
 async function flush(loud = false) {
-  if (flushing) return;
+  if (flushing) {
+    rerun = true;
+    return;
+  }
   flushing = true;
   let progress = true;
-  while (progress) {
+  while (progress || rerun) {
+    rerun = false;
     progress = false;
     for (const value of getPending()) {
       const r = await claim(value);
@@ -58,7 +69,6 @@ async function flush(loud = false) {
         drop();
         progress = true;
         notify({ kind: "ok", text: `Flag ${r.flag_number} captured! +${r.points_awarded ?? 0} pts` });
-        window.opener?.postMessage("nexora-claimed", CONTROL_ORIGIN);
       } else if (r.success && r.already_solved) {
         drop();
       } else if (r.not_a_flag) {
@@ -87,13 +97,7 @@ export function initClaims(onNotice: Listener, onLinked: (linked: boolean) => vo
   if (started) return;
   started = true;
 
-  window.addEventListener("message", (e) => {
-    if (e.origin !== CONTROL_ORIGIN || e.data?.type !== "nexora-session" || typeof e.data.token !== "string") return;
-    sessionStorage.setItem(TOKEN_KEY, e.data.token);
-    linkedListener(true);
-    void flush();
-  });
-  window.opener?.postMessage("nexora-ready", CONTROL_ORIGIN);
+  if (isLinked()) void flush();
 
   document.addEventListener("paste", (e) => foundFlag(e.clipboardData?.getData("text"), true));
   document.addEventListener("copy", () => foundFlag(String(document.getSelection() ?? "")));

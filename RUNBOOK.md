@@ -51,12 +51,13 @@ Serve each `dist/` from any static host. NEXORA must be served from the site roo
 - [ ] Flag 10 embedded with steghide (see ORGANIZER_CHALLENGE_GUIDE.md) and hash verified
 - [ ] Organizer and team passwords changed
 - [ ] `CTF_ALLOWED_ORIGINS` set
+- [x] Live dry run 2026-10-22 (run 15): approval login, NEXORA link, all 11 flags auto-credited incl. out-of-order queue; found and fixed 2 DB bugs + 1 queue bug
 - [ ] Dry run with two browsers: login -> approval -> takeover -> flags 1-11 -> final submit
 - [ ] `grep -r "NEXORA{" NEXORA/dist` shows only flags 1 and 2 (intended)
 - [ ] Reset or disable test teams
 
 ## 7. Flag auto-detection (how it works)
-- Team clicks **Open Challenge Website** on the dashboard. NEXORA asks the dashboard tab for the team session over `postMessage` (never in a URL) and shows "Team linked".
+- Team clicks **Open Challenge Website** on the dashboard. The session is passed in the URL fragment (`#link=...`, never sent to any server); NEXORA stores it in the tab and immediately scrubs it from the address bar and history, then shows "Team linked". Works in a new tab, the same tab, or with popup blockers.
 - Any `NEXORA{...}` that the site reveals (flags 2, 3, 6), or that the team pastes/copies on NEXORA, is sent to `/flags/claim`. The server finds which flag it is by hash and runs the normal submission (order, timer, decay, audit).
 - Values that are not flags are ignored and never count as wrong attempts. Out-of-order finds are queued in the tab and credited once unlocked.
 - If NEXORA was opened by typing the URL, the badge says "Not linked": close it and use the dashboard button.
