@@ -53,8 +53,8 @@ Serve each `dist/` from any static host. NEXORA must be served from the site roo
 5. End competition, export results.
 
 ## 6. Pre-event checklist
-- [ ] Flag 10 embedded with steghide (see ORGANIZER_CHALLENGE_GUIDE.md) and hash verified
-- [ ] Organizer and team passwords changed
+- [x] Flag 10 embedded and extraction proven (2026-10-22). Re-run `python tools/verify_flags.py --live --steghide <path>` before the event: must print ALL VERIFIED
+- [x] Organizer password rotated 2026-10-22 (in ORGANIZER_CREDENTIALS_AND_SECRETS.md, gitignored); seeded TEAM001-020 disabled, real teams are added via Teams & Check-in
 - [ ] `CTF_ALLOWED_ORIGINS` set
 - [x] Live dry run 2026-10-22 (run 15): approval login, NEXORA link, all 11 flags auto-credited incl. out-of-order queue; found and fixed 2 DB bugs + 1 queue bug
 - [ ] Dry run with two browsers: login -> approval -> takeover -> flags 1-11 -> final submit
