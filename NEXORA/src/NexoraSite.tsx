@@ -5,6 +5,7 @@ import {
   Search, AlertTriangle, Terminal, Download, Loader2,
 } from "lucide-react";
 import { supabase } from "./lib/supabase";
+import { initClaims, foundFlag, isLinked, type ClaimNotice } from "./lib/claim";
 
 type Page = "home" | "about" | "services" | "research" | "projects" | "blog" | "support" | "contact" | "gallery" | "login" | "confidential-audit-portal";
 
@@ -22,6 +23,18 @@ function getInitialPage(): Page {
 export function NexoraSite() {
   const [page, setPage] = useState<Page>(getInitialPage);
   const [mobileMenu, setMobileMenu] = useState(false);
+  const [notice, setNotice] = useState<ClaimNotice | null>(null);
+  const [linked, setLinked] = useState(isLinked);
+
+  useEffect(() => {
+    initClaims(setNotice, setLinked);
+  }, []);
+
+  useEffect(() => {
+    if (!notice) return;
+    const t = setTimeout(() => setNotice(null), 6000);
+    return () => clearTimeout(t);
+  }, [notice]);
 
   useEffect(() => {
     const handleHash = () => {
@@ -136,6 +149,17 @@ export function NexoraSite() {
       {page === "confidential-audit-portal" && <ConfidentialAuditPortalPage />}
 
       {/* Footer */}
+      <div className="fixed bottom-4 left-4 z-50 flex flex-col gap-2 items-start pointer-events-none">
+        {notice && (
+          <div role="status" className={`pointer-events-auto max-w-sm rounded-lg px-4 py-3 text-sm shadow-lg ${
+            notice.kind === "ok" ? "bg-emerald-600 text-white" : notice.kind === "bad" ? "bg-red-600 text-white" : notice.kind === "wait" ? "bg-amber-500 text-slate-900" : "bg-slate-800 text-white"
+          }`}>{notice.text}</div>
+        )}
+        <div className={`rounded-full px-3 py-1 text-xs shadow ${linked ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-100 text-slate-500 border border-slate-200"}`}>
+          {linked ? "Team linked: flags are auto-detected (or paste one anywhere)" : "Not linked: open this site from your team dashboard"}
+        </div>
+      </div>
+
       <footer className="bg-slate-900 text-slate-400">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -535,6 +559,10 @@ function SupportPage() {
   // SQL Injection challenge state
   const [queryTerm, setQueryTerm] = useState("");
   const [advisoryResults, setAdvisoryResults] = useState<AdvisoryItem[]>(DEFAULT_ADVISORIES);
+  // Flag 6: a successful UNION dump renders the vault row; claim whatever flag it shows.
+  useEffect(() => {
+    advisoryResults.forEach((a) => foundFlag(a.title));
+  }, [advisoryResults]);
   const [sqlError, setSqlError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -994,6 +1022,7 @@ function ConfidentialAuditPortalPage() {
     e.preventDefault();
     if (clearanceCode.trim() === "NX-SEC-AUTH-2026") {
       setIsUnlocked(true);
+      foundFlag("NEXORA{r0b0ts_s1t3m4p_3xp0s3d_4190}");
       setAuthError(false);
     } else {
       setAuthError(true);

@@ -14,7 +14,7 @@ Backend: Supabase project `atbvdnpvoxmbphitwnlo` (cft-srm-3rd-year): tables/func
 cd College-Web-Security && npm install
 cd ../NEXORA && npm install
 ```
-Each app needs a `.env` (see `.env.example`): `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`. Dashboard also `VITE_CHALLENGE_SITE_URL` (NEXORA's URL); NEXORA optionally `VITE_CONTROL_SITE_URL` (dashboard's URL, shows a footer link).
+Each app needs a `.env` (see `.env.example`): `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`. Dashboard also `VITE_CHALLENGE_SITE_URL` (NEXORA's URL); NEXORA also `VITE_CONTROL_SITE_URL` (dashboard's URL): required in production for flag auto-detection (and the footer link). Dev ports are fixed: dashboard 5173, NEXORA 5174.
 
 ## 2. Run locally
 ```bash
@@ -55,8 +55,15 @@ Serve each `dist/` from any static host. NEXORA must be served from the site roo
 - [ ] `grep -r "NEXORA{" NEXORA/dist` shows only flags 1 and 2 (intended)
 - [ ] Reset or disable test teams
 
-## 7. Troubleshooting
+## 7. Flag auto-detection (how it works)
+- Team clicks **Open Challenge Website** on the dashboard. NEXORA asks the dashboard tab for the team session over `postMessage` (never in a URL) and shows "Team linked".
+- Any `NEXORA{...}` that the site reveals (flags 2, 3, 6), or that the team pastes/copies on NEXORA, is sent to `/flags/claim`. The server finds which flag it is by hash and runs the normal submission (order, timer, decay, audit).
+- Values that are not flags are ignored and never count as wrong attempts. Out-of-order finds are queued in the tab and credited once unlocked.
+- If NEXORA was opened by typing the URL, the badge says "Not linked": close it and use the dashboard button.
+
+## 8. Troubleshooting
 - "Waiting for organizer approval" forever: nobody approved in the Approvals tab, or the admin session expired.
 - "No active competition": start a run from the dashboard first.
 - Team stuck on "already has an active session": force release session in team detail.
+- Badge stays "Not linked": NEXORA was not opened from the dashboard button, or `VITE_CONTROL_SITE_URL` / `VITE_CHALLENGE_SITE_URL` do not match the real URLs.
 - `gen_salt does not exist` on push: pgcrypto must live in the `public` schema (handled by `20260929171423_move_pgcrypto_to_public.sql`).

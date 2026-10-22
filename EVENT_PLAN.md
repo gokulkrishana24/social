@@ -10,11 +10,12 @@
 
 ## 2. Rules to announce (the system enforces only the first)
 1. **One device per team logs in to the dashboard.** Any other device must be approved by an organizer, and approval logs the first device out.
-2. **Only that device is used for the challenge.** The three members share it. This part is a *rule*, not a technical lock: NEXORA is a public website, so the system cannot stop a teammate from opening it on a phone. Proctors enforce it. Flags can only be *submitted* from the logged-in device.
+2. **Only that device is used for the challenge.** The three members share it. This part is a *rule*, not a technical lock: NEXORA is a public website, so the system cannot stop a teammate from opening it on a phone. Proctors enforce it. Flags can only be *credited* to the logged-in device's session.
 3. Flags are submitted in order, 1 to 11. A flag unlocks only after the previous one is solved.
-4. Format is `NEXORA{...}`. Wrong submissions are logged with a timestamp (rate limit 20/min per session).
-5. No attacking the dashboard, Supabase or other teams. The target is only the NEXORA website and its files.
-6. Tools allowed: browser DevTools, exiftool, binwalk, zsteg/stegano, steghide, 7-Zip, CyberChef, Python. Prepare a lab laptop image or give a tool list in advance.
+4. **Flags are auto-detected.** Always open NEXORA with the dashboard's *Open Challenge Website* button (the badge bottom-left must say "Team linked"). Flags the site reveals (2, 3, 6) are credited the moment they appear; for any other flag, paste it anywhere on the NEXORA page (Ctrl+V) or copy it from the page, and it is credited instantly. Manual submission on the dashboard still works. A flag found out of order is remembered and credited as soon as the previous one is solved.
+5. Format is `NEXORA{...}`. Wrong submissions are logged with a timestamp (rate limit 20/min per session).
+6. No attacking the dashboard, Supabase or other teams. The target is only the NEXORA website and its files.
+7. Tools allowed: browser DevTools, exiftool, binwalk, zsteg/stegano, steghide, 7-Zip, CyberChef, Python. Prepare a lab laptop image or give a tool list in advance.
 
 ## 3. Before the day
 - [ ] Finish setup in `RUNBOOK.md` (flag 10 embedded, passwords changed, origins set)
@@ -73,9 +74,9 @@ Two static Vite apps, both use hash routing so no rewrites are needed.
 | Vercel project | Root directory | Env vars |
 |----------------|----------------|----------|
 | `nexora-ctf-control` | `College-Web-Security` | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_CHALLENGE_SITE_URL` (NEXORA's Vercel URL) |
-| `nexora-site` | `NEXORA` | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, optional `VITE_CONTROL_SITE_URL` |
+| `nexora-site` | `NEXORA` | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_CONTROL_SITE_URL` (**required**: the control app URL, used for auto-detect) |
 
-Steps: import the repo twice in Vercel, set the root directory and env vars, deploy. Then set `CTF_ALLOWED_ORIGINS` (both Vercel URLs) on the Supabase function:
+Steps: import the repo twice in Vercel, set the root directory and env vars, deploy. Then set `CTF_ALLOWED_ORIGINS` (both Vercel URLs; NEXORA calls the API directly for auto-detect) on the Supabase function:
 
     npx supabase secrets set CTF_ALLOWED_ORIGINS=https://control.vercel.app,https://nexora.vercel.app
 

@@ -140,6 +140,30 @@ export function StudentDashboard() {
     loadProgress();
   }, [loadProgress]);
 
+  const isDev = import.meta.env.DEV;
+  const challengeUrl = import.meta.env.VITE_CHALLENGE_SITE_URL;
+  const challengeTarget = challengeUrl || "http://localhost:5174";
+
+  // Auto-detect handoff: NEXORA (opened from here) asks for the team session over postMessage,
+  // so the token never goes into a URL. Only the configured challenge origin gets an answer.
+  useEffect(() => {
+    const origin = new URL(challengeTarget).origin;
+    const onMessage = (e: MessageEvent) => {
+      if (e.origin !== origin || !e.source) return;
+      if (e.data === "nexora-ready" && sessionToken) {
+        (e.source as Window).postMessage({ type: "nexora-session", token: sessionToken }, origin);
+      } else if (e.data === "nexora-claimed") {
+        loadProgress();
+      }
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, [challengeTarget, sessionToken, loadProgress]);
+
+  const openChallenge = () => {
+    window.open(challengeTarget, "nexora-challenge"); // keeps window.opener so NEXORA can ask for the session
+  };
+
   // Countdown timer — purely visual, server is authoritative
   useEffect(() => {
     if (!team?.timer_active || team.status === "COMPLETED" || team.status === "EXPIRED" || team.status === "FORCE_FINISHED") return;
@@ -271,8 +295,6 @@ export function StudentDashboard() {
   const timerExpired = remainingSeconds <= 0;
   const submissionsDisabled = isCompleted || isExpired || isDisabled || isForceFinished || competitionNotStarted || isPaused || competitionEnded || timerExpired;
 
-  const isDev = import.meta.env.DEV;
-  const challengeUrl = import.meta.env.VITE_CHALLENGE_SITE_URL;
 
   if (isCompleted && finalResult) {
     return (
@@ -415,27 +437,13 @@ export function StudentDashboard() {
                 )}
               </div>
             </div>
-            {challengeUrl ? (
-              <a
-                href={challengeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-cyan-500/20 whitespace-nowrap"
-              >
-                <ExternalLink className="w-4 h-4" />
-                Open Challenge Website
-              </a>
-            ) : (
-              <a
-                href="http://localhost:5174"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-cyan-500/20 whitespace-nowrap"
-              >
-                <ExternalLink className="w-4 h-4" />
-                Open Challenge Website
-              </a>
-            )}
+            <button
+              onClick={openChallenge}
+              className="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-cyan-500/20 whitespace-nowrap"
+            >
+              <ExternalLink className="w-4 h-4" />
+              Open Challenge Website
+            </button>
           </div>
         </div>
 

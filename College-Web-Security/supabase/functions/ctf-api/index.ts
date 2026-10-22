@@ -213,6 +213,23 @@ Deno.serve(async (req: Request) => {
       return json(data);
     }
 
+    // Auto-detect from NEXORA: value only, server works out which flag it is.
+    if (path === "/flags/claim" && req.method === "POST") {
+      const body = await getBody(req);
+      const token = String(body.session_token || "");
+      const value = String(body.value || "").trim();
+      if (!token || !/^NEXORA\{[^}]{1,120}\}$/.test(value)) {
+        return json({ success: false, not_a_flag: true, error: "Not a valid flag." }, 400);
+      }
+      const rate = checkRate(submitAttempts, token, 20, 60_000);
+      if (!rate.allowed) {
+        return json({ success: false, error: `Too many submissions. Try again in ${rate.retryAfter}s.` }, 429);
+      }
+      const { data, error } = await supabase.rpc("ctf_claim_flag", { p_session_token: token, p_value: value, p_ip: ip });
+      if (error) return json({ success: false, error: "Claim failed." }, 500);
+      return json(data);
+    }
+
     if (path === "/flags/progress" && req.method === "POST") {
       const body = await getBody(req);
       const token = String(body.session_token || "");
