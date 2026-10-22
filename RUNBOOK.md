@@ -40,6 +40,11 @@ cd NEXORA && npm run build
 ```
 Serve each `dist/` from any static host. NEXORA must be served from the site root (`/robots.txt`, `/.well-known/`, `/gallery/`, `/archive/` are part of the challenges).
 
+## 4b. Teams, lobby, schedule (organizer)
+- **Teams & Check-in** tab: bulk-add teams (`Team name, email` per line) -> credentials shown once (CSV/print/mailto); per-team *Reset password*; live check-in counter; scheduled start time; **Open lobby**.
+- Flow: add teams -> Save start time -> Open lobby (morning) -> approve devices as teams log in -> press **Start Competition** at the time (all clocks start together).
+- Without a lobby, *Start* still works as before (creates the run and clears sessions).
+
 ## 5. Event day
 1. Dashboard `/management` -> log in as organizer.
 2. Open **Approvals** and keep it visible.

@@ -10,8 +10,9 @@ import {
   apiCall, type AccessRequest, type DashboardResult, type TeamDetailResult,
   type AuditLogResult, type ExportResult, type RunHistoryResult, type RunHistoryEntry,
 } from "@/lib/api";
+import { RosterPanel } from "./RosterPanel";
 
-type View = "overview" | "approvals" | "timeline" | "hints" | "logs" | "test" | "history";
+type View = "overview" | "roster" | "approvals" | "timeline" | "hints" | "logs" | "test" | "history";
 
 export function AdminDashboard() {
   const { sessionToken, logout } = useAdminAuth();
@@ -157,6 +158,7 @@ export function AdminDashboard() {
         <div className="flex gap-2 mb-6 border-b border-slate-800 pb-px">
           {([
             { id: "overview", label: "Overview", icon: Users },
+            { id: "roster", label: "Teams & Check-in", icon: UserPlus },
             { id: "approvals", label: "Approvals", icon: ShieldCheck },
             { id: "timeline", label: "Timeline", icon: Clock },
             { id: "hints", label: "Hints", icon: Flag },
@@ -180,6 +182,7 @@ export function AdminDashboard() {
           })}
         </div>
 
+        {view === "roster" && <RosterPanel sessionToken={sessionToken} runStatus={runStatus} hasRun={!!run?.id} />}
         {view === "approvals" && <ApprovalsPanel sessionToken={sessionToken} />}
         {view === "timeline" && <TimelinePanel sessionToken={sessionToken} />}
         {view === "hints" && <HintsPanel sessionToken={sessionToken} />}
@@ -214,7 +217,7 @@ export function AdminDashboard() {
                       className="flex items-center gap-2 px-4 py-2.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
                     >
                       <Play className="w-4 h-4" />
-                      {runStatus === "NOT_STARTED" ? "Start Competition" : "Start New Competition"}
+                      {run?.id && runStatus === "NOT_STARTED" ? "Start Competition (all clocks start now)" : "Start New Competition"}
                     </button>
                   )}
                   {runStatus === "RUNNING" && (

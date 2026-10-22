@@ -3,6 +3,7 @@ import { Shield, Lock, User, AlertCircle, Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useRouter } from "@/lib/router";
 import { apiCall, getDevice } from "@/lib/api";
+import { EventCountdown } from "./EventCountdown";
 
 export function LoginPage() {
   const { login } = useAuth();
@@ -79,6 +80,8 @@ export function LoginPage() {
 
         <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-2xl p-8 shadow-2xl">
           <h2 className="text-lg font-semibold text-white mb-6">{mode === "login" ? "Team Login" : "Register Team"}</h2>
+
+          <EventCountdown />
 
           {pending && (
             <div className="flex items-start gap-3 bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 mb-5">

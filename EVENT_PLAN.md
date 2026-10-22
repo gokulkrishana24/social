@@ -17,27 +17,42 @@
 6. No attacking the dashboard, Supabase or other teams. The target is only the NEXORA website and its files.
 7. Tools allowed: browser DevTools, exiftool, binwalk, zsteg/stegano, steghide, 7-Zip, CyberChef, Python. Prepare a lab laptop image or give a tool list in advance.
 
-## 3. Before the day
-- [ ] Finish setup in `RUNBOOK.md` (flag 10 embedded, passwords changed, origins set)
-- [ ] Register teams: either pre-create them or let teams request registration (approve each; code `TEAM-XXXXXX`). Print each team's Team ID + password on a card.
-- [ ] Dry run with 2 browsers and a test team (login, approval, takeover, flags 1-11), then reset test teams
-- [ ] Put the hint sheet (Hints tab) on the approver's/proctors' screen only
-- [ ] Check tools are installed on team machines
+## 3. Before the day (T-2 days to T-1 evening)
+1. **Setup** per `RUNBOOK.md`: Flag 10 embedded, organizer + seeded `TEAM001-020` passwords changed (use *Reset password* on each, or ignore the seeded teams and disable them), origins set, both apps on Vercel.
+2. **Add the teams** (dashboard -> **Teams & Check-in** -> *Add teams*): paste one team per line as `Team name, lead@email.com`. The system creates `TEAMnnn` IDs and random passwords and shows them **once**. Click **Download CSV** (keep it safe, not in the repo) and/or **Print** for cards. The **Email** link beside each row opens a pre-filled mail to that team's address (the system does not send mail itself).
+3. **Set the start time** (Scheduled start = event day 09:00 -> *Save*). Teams see "starts at 09:00 - in 3h 12m" on the login page and in the dashboard.
+4. **Dry run** with a test team (login, approval, takeover, flags 1-11), then reset/disable the test team.
+5. Print the hint sheet for proctors only; confirm tools on team machines; test Wi-Fi for ~65 people (20 laptops + phones).
 
-## 4. Timeline (adjust to your schedule)
-| Time | Action |
-|------|--------|
-| T-30 min | Teams seated, laptops ready, credentials cards handed out. Nobody can log in yet (no active competition). |
-| T-10 | Dashboard -> **Start competition**. Teams log in; approve the 20 device requests in the Approvals tab. Each team's timer starts on its first login, so approve quickly and in one batch. |
-| T+0 | Brief the rules. NEXORA link is on the dashboard. |
-| T+0:30 | Flags 1-2 should be falling. First hint release only on request. |
-| T+1:30 | Mid-event check: Timeline tab, who is stuck on which flag. Announce standings from Overview. |
-| T+2:00 | Release level 1-2 hints for any flag fewer than 5 teams have solved. |
-| T+2:30 | Release level 3-4 hints for stuck flags. |
-| T+2:50 | Warn: 10 minutes left; final submission is required to count as completed. |
-| T+3:00 | Timers expire. Force finish all if needed. Export results. |
+## 4. Event day timeline (start = 09:00)
+Teams' 3-hour clocks all start together at 09:00 sharp, because the lobby holds everyone before that. End = 12:00.
 
-Pause / Resume freezes every team's timer if there is a power or network problem.
+| Time | Who | Action |
+|------|-----|--------|
+| 07:30 | Tech | Check Supabase, both sites, `/health`; open the **Teams & Check-in** tab and the **Approvals** tab on the organizer laptop. |
+| 07:45 | Lead | Teams & Check-in -> **Open lobby**. Teams can now log in; clocks do **not** run yet (they see "Waiting" + countdown). |
+| 08:00 | Proctors | Doors open. Each team gets its credential card, sits at one laptop. Rule briefing: one device, one login. |
+| 08:00-08:45 | Team: log in on the team laptop -> "Waiting for organizer approval". Approver: match the team ID/name on the roster, **Approve** (check the device label). Team page logs in by itself in ~3 seconds. **Check-in X/20** counts up. Absent/late team? Leave them; they can join after the start (their clock starts when they first log in). |
+| 08:45 | Lead | Check-in reaches 20/20 (or call missing teams). Approver clears any remaining requests. |
+| 08:50 | Lead | Briefing (5 min): scoring, order of flags, auto-detect (open NEXORA from the dashboard button, paste flags with Ctrl+V), hints policy, conduct. |
+| 08:58 | Lead | Everyone has the dashboard open on the countdown. Countdown to 09:00. |
+| **09:00** | Lead | Overview -> **Start Competition (all clocks start now)**. Every logged-in team's timer starts at the same instant; sessions are kept. |
+| 09:00-09:15 | Approver | Late arrivals/laptop swaps: Approvals tab (takeovers need a proctor's OK). |
+| 09:30 | Lead | First check: Timeline tab - flags 1-2 should be falling. No hints unless asked. |
+| 10:30 | Lead | Mid-event: standings from Overview, announce top 3 and flags solved so far. |
+| 11:00 | Proctors | Release level 1-2 hints for any flag fewer than 5 teams have solved. |
+| 11:30 | Proctors | Level 3-4 hints for stuck flags. |
+| 11:50 | Lead | 10-minute warning: submit the **final submission** to count as completed. |
+| **12:00** | Lead | Timers expire. **Force finish all** if needed, then **Export** results. |
+| 12:05 | Lead | Overview + Timeline -> tie-breaks (earlier finish, fewer wrong tries). Announce winners. |
+| 12:30 | Tech | End competition, export audit logs, **disable all teams** or reset passwords, rotate organizer password. |
+
+Pause / Resume freezes every team's timer for a power or network problem (the lobby also lets you pause before starting if something is not ready).
+
+## 4a. If the schedule slips
+- Not everyone is checked in at 08:58: wait, but announce a hard cut-off. Do not start with fewer than the agreed number without telling teams; late teams only lose time.
+- Change the start time in Teams & Check-in -> Scheduled start -> Save; teams' countdowns update within 30 seconds.
+- You must still press **Start** at the time. The schedule is a display/countdown; it does **not** start the event by itself (so you stay in control).
 
 ## 5. Hint policy (110 hints: 11 flags x 5 levels x 2 variants)
 - Hints live in the dashboard **Hints** tab, readable only with the organizer login (not in the team app and not readable through the public API).

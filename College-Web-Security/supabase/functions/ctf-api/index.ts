@@ -542,6 +542,47 @@ Deno.serve(async (req: Request) => {
       return json(data);
     }
 
+    if (path === "/event/info" && req.method === "POST") {
+      const { data, error } = await supabase.rpc("ctf_event_info");
+      if (error) return json({ success: false, error: "Failed to load event info." }, 500);
+      return json(data);
+    }
+
+    if (path === "/admin/create-teams" && req.method === "POST") {
+      const body = await getBody(req);
+      const { data, error } = await supabase.rpc("ctf_admin_create_teams", { p_session_token: String(body.session_token || ""), p_teams: Array.isArray(body.teams) ? body.teams.slice(0, 60) : [], p_ip: ip });
+      if (error) return json({ success: false, error: "Request failed." }, 500);
+      return json(data);
+    }
+
+    if (path === "/admin/reset-password" && req.method === "POST") {
+      const body = await getBody(req);
+      const { data, error } = await supabase.rpc("ctf_admin_reset_team_password", { p_session_token: String(body.session_token || ""), p_team_id: String(body.team_id || ""), p_ip: ip });
+      if (error) return json({ success: false, error: "Request failed." }, 500);
+      return json(data);
+    }
+
+    if (path === "/admin/roster" && req.method === "POST") {
+      const body = await getBody(req);
+      const { data, error } = await supabase.rpc("ctf_admin_roster", { p_session_token: String(body.session_token || "") });
+      if (error) return json({ success: false, error: "Request failed." }, 500);
+      return json(data);
+    }
+
+    if (path === "/admin/open-lobby" && req.method === "POST") {
+      const body = await getBody(req);
+      const { data, error } = await supabase.rpc("ctf_admin_open_lobby", { p_session_token: String(body.session_token || ""), p_ip: ip });
+      if (error) return json({ success: false, error: "Request failed." }, 500);
+      return json(data);
+    }
+
+    if (path === "/admin/set-schedule" && req.method === "POST") {
+      const body = await getBody(req);
+      const { data, error } = await supabase.rpc("ctf_admin_set_schedule", { p_session_token: String(body.session_token || ""), p_start: body.scheduled_start || null, p_name: String(body.event_name || "") });
+      if (error) return json({ success: false, error: "Request failed." }, 500);
+      return json(data);
+    }
+
     // ─── HEALTH CHECK ───────────────────────────────────
     if (path === "/health" || path === "/") {
       return json({ status: "ok", service: "ctf-api" });

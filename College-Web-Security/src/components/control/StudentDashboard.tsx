@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useRouter } from "@/lib/router";
+import { EventCountdown } from "./EventCountdown";
 import { apiCall, type FlagSubmitResult, type ProgressResult } from "@/lib/api";
 
 interface FlagConfig {
@@ -350,6 +351,7 @@ export function StudentDashboard() {
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Status banner */}
+        {competitionNotStarted && <EventCountdown />}
         {(competitionNotStarted || isExpired || isDisabled || isPaused || isForceFinished || competitionEnded) && (
           <div className={`flex items-center gap-3 rounded-xl p-4 mb-6 border ${
             isDisabled ? "bg-red-500/11 border-red-500/30" :
