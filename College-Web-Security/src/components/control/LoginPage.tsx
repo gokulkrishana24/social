@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/auth";
 import { useRouter } from "@/lib/router";
 import { apiCall, getDevice } from "@/lib/api";
 import { ThemeToggle } from "@/lib/theme";
+import { takeMagicLogin } from "@/lib/magicLogin";
 import { EventCountdown } from "./EventCountdown";
 
 export function LoginPage() {
@@ -37,6 +38,28 @@ export function LoginPage() {
     }
     setLoading(false);
   };
+
+  // One-click link (#/?u=...&p=...): sign in straight away. Approval flow below still applies on a new device.
+  useEffect(() => {
+    const run = () => {
+      const m = takeMagicLogin();
+      if (!m) return;
+      setUsername(m.u);
+      setPassword(m.p);
+      setError("");
+      setLoading(true);
+      login(m.u, m.p).then((res) => {
+        if (res.success) navigate("/dashboard");
+        else if (res.requestId) setPending({ id: res.requestId, kind: "DEVICE" });
+        else setError(res.error || "Login failed.");
+        setLoading(false);
+      });
+    };
+    run();
+    window.addEventListener("hashchange", run); // link pasted while the login page is already open
+    return () => window.removeEventListener("hashchange", run);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Poll the admin decision; on approval a device request logs in again (consumes the approval).
   useEffect(() => {
