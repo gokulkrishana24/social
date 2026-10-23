@@ -42,3 +42,10 @@ Thumbs.db
 .idea/
 
 ORGANIZER_CREDENTIALS_AND_SECRETS.md
+
+# Organizer-only stego build material (contains solutions)
+Photos and the hidden contents*
+
+# Supabase CLI local state
+**/supabase/.temp/
+/supabase/

@@ -1,11 +1,11 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
-import { apiCall, type TeamInfo } from "./api";
+import { apiCall, getDevice, type TeamInfo } from "./api";
 
 interface AuthState {
   sessionToken: string | null;
   team: TeamInfo | null;
   loading: boolean;
-  login: (username: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  login: (username: string, password: string) => Promise<{ success: boolean; error?: string; requestId?: string }>;
   logout: () => Promise<void>;
   refreshSession: () => Promise<void>;
 }
@@ -40,7 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [refreshSession]);
 
   const login = useCallback(async (username: string, password: string) => {
-    const res = await apiCall("/team/login", { username, password });
+    const res = await apiCall("/team/login", { username, password, ...getDevice() });
     if (res.success && res.session_token) {
       const token = String(res.session_token);
       sessionStorage.setItem(TOKEN_KEY, token);
@@ -48,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (res.team) setTeam(res.team as TeamInfo);
       return { success: true };
     }
-    return { success: false, error: res.error };
+    return { success: false, error: res.error, requestId: res.pending_approval ? String(res.request_id) : undefined };
   }, []);
 
   const logout = useCallback(async () => {

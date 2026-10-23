@@ -1,0 +1,7 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "control", "runtimeExecutable": "npm", "runtimeArgs": ["--prefix", "College-Web-Security", "run", "dev"], "port": 5173 },
+    { "name": "nexora", "runtimeExecutable": "npm", "runtimeArgs": ["--prefix", "NEXORA", "run", "dev"], "port": 5174 }
+  ]
+}

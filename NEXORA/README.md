@@ -5,7 +5,7 @@ Independent challenge target website for the College Web Security CTF competitio
 ## Features
 - Complete corporate website for NEXORA Systems (Home, About, Services, Research, Projects, Blog, Support, Contact, Employee Login).
 - Self-contained challenge interface and clues.
-- Zero connection to the CTF control backend or Supabase.
+- Optional Supabase (anon key in `.env`): advisories table + contact form inserts. Falls back to static data without it.
 
 ## Getting Started
 

@@ -207,3 +207,29 @@ export interface RunHistoryEntry {
 export interface RunHistoryResult extends ApiResponse {
   runs?: RunHistoryEntry[];
 }
+
+const DEVICE_KEY = "ctf_device_id";
+
+/** Stable per-browser ID; the admin approves devices by this (shown shortened) plus the label. */
+export function getDevice() {
+  let id = localStorage.getItem(DEVICE_KEY);
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem(DEVICE_KEY, id);
+  }
+  return { device_id: id, device_label: `${navigator.platform} - ${navigator.userAgent.slice(0, 120)}` };
+}
+
+export interface AccessRequest {
+  id: string;
+  kind: "DEVICE" | "REGISTRATION";
+  status: "PENDING" | "APPROVED" | "DENIED" | "USED";
+  team_code: string | null;
+  team_name: string;
+  username: string;
+  device_label: string | null;
+  device_id: string;
+  ip_address: string | null;
+  had_active_session: boolean;
+  created_at: string;
+}

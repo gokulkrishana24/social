@@ -2,15 +2,17 @@ import { useState, useEffect } from "react";
 import {
   Menu, X, Cpu, ArrowRight, Shield, Cloud, Database, Network,
   Users, Award, Mail, Phone, MapPin, ChevronRight, Lock, Activity, CheckCircle,
-  Search, AlertTriangle, Terminal,
+  Search, AlertTriangle, Terminal, Download, Loader2,
 } from "lucide-react";
+import { supabase } from "./lib/supabase";
+import { initClaims, foundFlag, isLinked, type ClaimNotice } from "./lib/claim";
 
-type Page = "home" | "about" | "services" | "research" | "projects" | "blog" | "support" | "contact" | "login" | "confidential-audit-portal";
+type Page = "home" | "about" | "services" | "research" | "projects" | "blog" | "support" | "contact" | "gallery" | "login" | "confidential-audit-portal";
 
 function getInitialPage(): Page {
   const hash = window.location.hash.replace(/^#\/?/, "").toLowerCase();
   if (hash === "confidential-audit-portal") return "confidential-audit-portal";
-  if (["home", "about", "services", "research", "projects", "blog", "support", "contact", "login"].includes(hash)) {
+  if (["home", "about", "services", "research", "projects", "blog", "support", "contact", "gallery", "login"].includes(hash)) {
     return hash as Page;
   }
   const path = window.location.pathname.replace(/^\//, "").toLowerCase();
@@ -21,6 +23,18 @@ function getInitialPage(): Page {
 export function NexoraSite() {
   const [page, setPage] = useState<Page>(getInitialPage);
   const [mobileMenu, setMobileMenu] = useState(false);
+  const [notice, setNotice] = useState<ClaimNotice | null>(null);
+  const [linked, setLinked] = useState(isLinked);
+
+  useEffect(() => {
+    initClaims(setNotice, setLinked);
+  }, []);
+
+  useEffect(() => {
+    if (!notice) return;
+    const t = setTimeout(() => setNotice(null), 6000);
+    return () => clearTimeout(t);
+  }, [notice]);
 
   useEffect(() => {
     const handleHash = () => {
@@ -37,6 +51,7 @@ export function NexoraSite() {
     { id: "research", label: "Research" },
     { id: "projects", label: "Projects" },
     { id: "blog", label: "Blog" },
+    { id: "gallery", label: "Gallery" },
     { id: "support", label: "Support" },
     { id: "contact", label: "Contact" },
   ];
@@ -49,16 +64,16 @@ export function NexoraSite() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-slate-800 font-sans">
+    <div className="min-h-screen bg-white text-slate-800 font-sans antialiased [&_button]:focus-visible:outline-none [&_button]:focus-visible:ring-2 [&_button]:focus-visible:ring-cyan-500/70">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200">
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-slate-200/80 shadow-sm shadow-slate-900/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <button onClick={() => navigate("home")} className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
                 <Cpu className="w-5 h-5 text-cyan-400" />
               </div>
-              <span className="font-bold text-lg text-slate-900 tracking-tight">NEXORA</span>
+              <span className="font-extrabold text-lg text-slate-900 tracking-tight">NEXORA</span>
               <span className="text-xs font-medium text-slate-400 tracking-widest hidden sm:inline">SYSTEMS</span>
             </button>
 
@@ -88,7 +103,7 @@ export function NexoraSite() {
               </button>
               <button
                 onClick={() => setMobileMenu(!mobileMenu)}
-                className="lg:hidden p-2 text-slate-600 hover:text-slate-900"
+                aria-label="Toggle menu" aria-expanded={mobileMenu} className="lg:hidden p-2 text-slate-600 hover:text-slate-900 rounded-lg"
               >
                 {mobileMenu ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
@@ -129,10 +144,22 @@ export function NexoraSite() {
       {page === "blog" && <BlogPage />}
       {page === "support" && <SupportPage />}
       {page === "contact" && <ContactPage />}
+      {page === "gallery" && <GalleryPage />}
       {page === "login" && <LoginPage />}
       {page === "confidential-audit-portal" && <ConfidentialAuditPortalPage />}
 
       {/* Footer */}
+      <div className="fixed bottom-4 left-4 z-50 flex flex-col gap-2 items-start pointer-events-none">
+        {notice && (
+          <div role="status" className={`pointer-events-auto max-w-sm rounded-lg px-4 py-3 text-sm shadow-lg ${
+            notice.kind === "ok" ? "bg-emerald-600 text-white" : notice.kind === "bad" ? "bg-red-600 text-white" : notice.kind === "wait" ? "bg-amber-500 text-slate-900" : "bg-slate-800 text-white"
+          }`}>{notice.text}</div>
+        )}
+        <div className={`rounded-full px-3 py-1 text-xs shadow ${linked ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-100 text-slate-500 border border-slate-200"}`}>
+          {linked ? "Team linked: flags are auto-detected (or paste one anywhere)" : "Not linked: open this site from your team dashboard"}
+        </div>
+      </div>
+
       <footer className="bg-slate-900 text-slate-400">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -154,6 +181,7 @@ export function NexoraSite() {
                 <li><button onClick={() => navigate("research")} className="hover:text-cyan-400 transition-colors">Research</button></li>
                 <li><button onClick={() => navigate("blog")} className="hover:text-cyan-400 transition-colors">Blog</button></li>
                 <li><button onClick={() => navigate("projects")} className="hover:text-cyan-400 transition-colors">Projects</button></li>
+                <li><button onClick={() => navigate("gallery")} className="hover:text-cyan-400 transition-colors">Gallery</button></li>
               </ul>
             </div>
             <div>
@@ -175,6 +203,9 @@ export function NexoraSite() {
           </div>
           <div className="mt-10 pt-8 border-t border-slate-800 text-center text-sm">
             <p>&copy; 2026 Nexora Systems, Inc. All rights reserved.</p>
+            {import.meta.env.VITE_CONTROL_SITE_URL && (
+              <a href={import.meta.env.VITE_CONTROL_SITE_URL} className="text-slate-500 hover:text-cyan-400 text-xs mt-2 inline-block">Competition Portal</a>
+            )}
           </div>
         </div>
       </footer>
@@ -190,7 +221,7 @@ function HomePage({ navigate }: { navigate: (p: Page) => void }) {
           backgroundImage: "radial-gradient(circle at 20% 50%, rgba(34, 211, 238, 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(59, 130, 246, 0.3) 0%, transparent 50%)"
         }} />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
-          <div className="max-w-3xl">
+          <div className="max-w-3xl nx-fade-up">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-cyan-500/10 border border-cyan-500/20 rounded-full text-sm text-cyan-300 mb-6">
               <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
               Now deploying AI-native infrastructure
@@ -267,7 +298,7 @@ function HomePage({ navigate }: { navigate: (p: Page) => void }) {
                 desc: "High-throughput streaming, globally replicated databases, and event-driven data fabrics.",
               },
             ].map((s) => (
-              <div key={s.title} className="bg-white rounded-2xl p-8 border border-slate-200/80 hover:shadow-lg transition-shadow">
+              <div key={s.title} className="bg-white rounded-2xl p-8 border border-slate-200/80 hover:shadow-xl hover:-translate-y-1 transition-all duration-200">
                 <div className="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center mb-6">
                   <s.icon className="w-6 h-6 text-cyan-600" />
                 </div>
@@ -275,6 +306,18 @@ function HomePage({ navigate }: { navigate: (p: Page) => void }) {
                 <p className="text-slate-600 text-sm leading-relaxed">{s.desc}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 bg-white">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="rounded-3xl bg-gradient-to-br from-slate-900 to-slate-800 p-10 sm:p-14 text-center text-white shadow-xl">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-3">Ready to harden your platform?</h2>
+            <p className="text-slate-300 mb-8 max-w-xl mx-auto">Talk to our engineers about zero-trust, edge and data modernization for your organization.</p>
+            <button onClick={() => navigate("contact")} className="inline-flex items-center gap-2 px-6 py-3.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold rounded-xl transition-colors">
+              Talk to an engineer <ArrowRight className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </section>
@@ -456,7 +499,7 @@ function ProjectsPage() {
 function BlogPage() {
   useEffect(() => {
     try {
-      sessionStorage.setItem("nexora_vault_gamma", "ImNuMTRuXzU5MjN9Ig==");
+      sessionStorage.setItem("nexora_vault_gamma", "Y2g0MW5fNTkyM30=");
     } catch {}
   }, []);
   const posts = [
@@ -516,7 +559,21 @@ function SupportPage() {
   // SQL Injection challenge state
   const [queryTerm, setQueryTerm] = useState("");
   const [advisoryResults, setAdvisoryResults] = useState<AdvisoryItem[]>(DEFAULT_ADVISORIES);
+  // Flag 6: a successful UNION dump renders the vault row; claim whatever flag it shows.
+  useEffect(() => {
+    advisoryResults.forEach((a) => foundFlag(a.title));
+  }, [advisoryResults]);
   const [sqlError, setSqlError] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase
+      ?.from("nexora_advisories")
+      .select("id, advisory_id, title, severity")
+      .order("id")
+      .then(({ data }) => {
+        if (data?.length) setAdvisoryResults(data as AdvisoryItem[]);
+      });
+  }, []);
 
   useEffect(() => {
     fetch("/api/v1/system-status.json")
@@ -810,6 +867,28 @@ function SupportPage() {
 }
 
 function ContactPage() {
+  const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const field = "w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition";
+
+  const submit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const f = new FormData(form);
+    setState("sending");
+    const { error } = supabase
+      ? await supabase.from("nexora_contact_messages").insert({
+          first_name: String(f.get("first_name")),
+          last_name: String(f.get("last_name")),
+          email: String(f.get("email")),
+          company: String(f.get("company") || ""),
+          message: String(f.get("message")),
+        })
+      : { error: null }; // no backend configured: accept silently
+    if (error) return setState("error");
+    form.reset();
+    setState("sent");
+  };
+
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
       <h1 className="text-4xl font-bold text-slate-900 mb-4">Get in Touch</h1>
@@ -839,15 +918,27 @@ function ContactPage() {
           </div>
         </div>
         <div className="md:col-span-2">
-          <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-            <div className="grid grid-cols-2 gap-4">
-              <input placeholder="First Name" className="border border-slate-300 rounded-lg px-4 py-2.5 focus:outline-none focus:border-cyan-500" />
-              <input placeholder="Last Name" className="border border-slate-300 rounded-lg px-4 py-2.5 focus:outline-none focus:border-cyan-500" />
+          {state === "sent" && (
+            <div role="status" className="mb-4 flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+              <CheckCircle className="w-4 h-4" /> Message sent. We'll reply within one business day.
             </div>
-            <input placeholder="Work Email" className="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:outline-none focus:border-cyan-500" />
-            <input placeholder="Company" className="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:outline-none focus:border-cyan-500" />
-            <textarea placeholder="How can we help?" rows={5} className="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:outline-none focus:border-cyan-500" />
-            <button className="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg transition-colors">Send Message</button>
+          )}
+          {state === "error" && (
+            <div role="alert" className="mb-4 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+              <AlertTriangle className="w-4 h-4" /> Could not send your message. Please try again.
+            </div>
+          )}
+          <form className="space-y-4" onSubmit={submit}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <input name="first_name" required maxLength={80} aria-label="First name" placeholder="First Name" className={field} />
+              <input name="last_name" required maxLength={80} aria-label="Last name" placeholder="Last Name" className={field} />
+            </div>
+            <input name="email" type="email" required maxLength={200} aria-label="Work email" placeholder="Work Email" className={field} />
+            <input name="company" maxLength={120} aria-label="Company" placeholder="Company" className={field} />
+            <textarea name="message" required maxLength={2000} aria-label="Message" placeholder="How can we help?" rows={5} className={field} />
+            <button disabled={state === "sending"} className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 hover:bg-slate-800 disabled:opacity-60 text-white font-semibold rounded-lg transition-colors">
+              {state === "sending" && <Loader2 className="w-4 h-4 animate-spin" />} Send Message
+            </button>
           </form>
         </div>
       </div>
@@ -855,7 +946,39 @@ function ContactPage() {
   );
 }
 
+function GalleryPage() {
+  const shots = [
+    { file: "office.png", title: "Operations Floor", caption: "Our San Jose network operations center, 24/7." },
+    { file: "network.png", title: "Mesh Topology", caption: "A snapshot of the global edge mesh." },
+    { file: "lake.png", title: "Retreat at the Lake", caption: "Annual engineering offsite, Lake Tahoe." },
+    { file: "workspace.jpg", title: "Workspace", caption: "Where our platform engineers build." },
+  ];
+  return (
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <h1 className="text-4xl font-bold text-slate-900 mb-4">Gallery</h1>
+      <p className="text-lg text-slate-500 mb-10 max-w-2xl">Life at Nexora Systems. Full-resolution press images are available for download.</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {shots.map((s) => (
+          <figure key={s.file} className="bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl transition-shadow">
+            <img src={`/gallery/${s.file}`} alt={s.title} loading="lazy" className="w-full aspect-[3/2] object-cover" />
+            <figcaption className="flex items-center justify-between gap-4 p-5">
+              <div>
+                <p className="font-semibold text-slate-900">{s.title}</p>
+                <p className="text-sm text-slate-500">{s.caption}</p>
+              </div>
+              <a href={`/gallery/${s.file}`} download className="shrink-0 p-2.5 rounded-lg text-slate-500 hover:text-cyan-600 hover:bg-cyan-50 focus-visible:ring-2 focus-visible:ring-cyan-500" aria-label={`Download ${s.title}`}>
+                <Download className="w-5 h-5" />
+              </a>
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function LoginPage() {
+  const [denied, setDenied] = useState(false);
   return (
     <div className="max-w-md mx-auto px-4 sm:px-6 py-16">
       <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-lg">
@@ -866,7 +989,10 @@ function LoginPage() {
           <h1 className="text-2xl font-bold text-slate-900">Employee Portal</h1>
           <p className="text-sm text-slate-500 mt-1">Sign in to your Nexora Systems account</p>
         </div>
-        <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+        <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); setDenied(true); }}>
+          {denied && (
+            <p role="alert" className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">Invalid credentials. Contact IT if you are locked out.</p>
+          )}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1.5">Username</label>
             <input placeholder="username@nexorasys.com" className="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:outline-none focus:border-cyan-500" />
@@ -896,6 +1022,7 @@ function ConfidentialAuditPortalPage() {
     e.preventDefault();
     if (clearanceCode.trim() === "NX-SEC-AUTH-2026") {
       setIsUnlocked(true);
+      foundFlag("NEXORA{r0b0ts_s1t3m4p_3xp0s3d_4190}");
       setAuthError(false);
     } else {
       setAuthError(true);

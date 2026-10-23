@@ -123,9 +123,38 @@ Deno.serve(async (req: Request) => {
         p_username: username,
         p_password: password,
         p_ip: ip,
+        p_device_id: String(body.device_id || ""),
+        p_device_label: String(body.device_label || "").slice(0, 200),
       });
 
       if (error) return json({ success: false, error: "Login failed." }, 500);
+      return json(data);
+    }
+
+    if (path === "/team/register" && req.method === "POST") {
+      const body = await getBody(req);
+      const rate = checkRate(loginAttempts, `reg:${ip}`, 5, 60_000);
+      if (!rate.allowed) {
+        return json({ success: false, error: `Too many attempts. Try again in ${rate.retryAfter}s.` }, 429);
+      }
+      const { data, error } = await supabase.rpc("ctf_team_register", {
+        p_team_name: String(body.team_name || ""),
+        p_username: String(body.username || "").trim(),
+        p_password: String(body.password || ""),
+        p_device_id: String(body.device_id || ""),
+        p_device_label: String(body.device_label || "").slice(0, 200),
+        p_ip: ip,
+      });
+      if (error) return json({ success: false, error: "Registration failed." }, 500);
+      return json(data);
+    }
+
+    if (path === "/team/request-status" && req.method === "POST") {
+      const body = await getBody(req);
+      const id = String(body.request_id || "");
+      if (!/^[0-9a-f-]{36}$/i.test(id)) return json({ success: false, error: "Bad request id." }, 400);
+      const { data, error } = await supabase.rpc("ctf_access_request_status", { p_request_id: id });
+      if (error) return json({ success: false, error: "Status check failed." }, 500);
       return json(data);
     }
 
@@ -165,7 +194,7 @@ Deno.serve(async (req: Request) => {
         return json({ success: false, error: "Missing required fields." }, 400);
       }
 
-      if (flagNumber < 1 || flagNumber > 10) {
+      if (flagNumber < 1 || flagNumber > 11) {
         return json({ success: false, error: "Invalid flag number." }, 400);
       }
 
@@ -181,6 +210,23 @@ Deno.serve(async (req: Request) => {
         p_ip: ip,
       });
       if (error) return json({ success: false, error: "Submission failed." }, 500);
+      return json(data);
+    }
+
+    // Auto-detect from NEXORA: value only, server works out which flag it is.
+    if (path === "/flags/claim" && req.method === "POST") {
+      const body = await getBody(req);
+      const token = String(body.session_token || "");
+      const value = String(body.value || "").trim();
+      if (!token || !/^NEXORA\{[^}]{1,120}\}$/.test(value)) {
+        return json({ success: false, not_a_flag: true, error: "Not a valid flag." }, 400);
+      }
+      const rate = checkRate(submitAttempts, token, 20, 60_000);
+      if (!rate.allowed) {
+        return json({ success: false, error: `Too many submissions. Try again in ${rate.retryAfter}s.` }, 429);
+      }
+      const { data, error } = await supabase.rpc("ctf_claim_flag", { p_session_token: token, p_value: value, p_ip: ip });
+      if (error) return json({ success: false, error: "Claim failed." }, 500);
       return json(data);
     }
 
@@ -456,6 +502,84 @@ Deno.serve(async (req: Request) => {
         p_session_token: token,
       });
       if (error) return json({ success: false, error: "Failed to load run history." }, 500);
+      return json(data);
+    }
+
+    if (path === "/admin/access-requests" && req.method === "POST") {
+      const body = await getBody(req);
+      const { data, error } = await supabase.rpc("ctf_admin_list_access_requests", {
+        p_session_token: String(body.session_token || ""),
+      });
+      if (error) return json({ success: false, error: "Failed to load requests." }, 500);
+      return json(data);
+    }
+
+    if (path === "/admin/decide-access" && req.method === "POST") {
+      const body = await getBody(req);
+      const id = String(body.request_id || "");
+      if (!/^[0-9a-f-]{36}$/i.test(id)) return json({ success: false, error: "Bad request id." }, 400);
+      const { data, error } = await supabase.rpc("ctf_admin_decide_access_request", {
+        p_session_token: String(body.session_token || ""),
+        p_request_id: id,
+        p_approve: body.approve === true,
+        p_ip: ip,
+      });
+      if (error) return json({ success: false, error: "Failed to save decision." }, 500);
+      return json(data);
+    }
+
+    if (path === "/admin/hints" && req.method === "POST") {
+      const body = await getBody(req);
+      const { data, error } = await supabase.rpc("ctf_admin_get_hints", { p_session_token: String(body.session_token || "") });
+      if (error) return json({ success: false, error: "Request failed." }, 500);
+      return json(data);
+    }
+
+    if (path === "/admin/solve-timeline" && req.method === "POST") {
+      const body = await getBody(req);
+      const { data, error } = await supabase.rpc("ctf_admin_solve_timeline", { p_session_token: String(body.session_token || "") });
+      if (error) return json({ success: false, error: "Request failed." }, 500);
+      return json(data);
+    }
+
+    if (path === "/event/info" && req.method === "POST") {
+      const { data, error } = await supabase.rpc("ctf_event_info");
+      if (error) return json({ success: false, error: "Failed to load event info." }, 500);
+      return json(data);
+    }
+
+    if (path === "/admin/create-teams" && req.method === "POST") {
+      const body = await getBody(req);
+      const { data, error } = await supabase.rpc("ctf_admin_create_teams", { p_session_token: String(body.session_token || ""), p_teams: Array.isArray(body.teams) ? body.teams.slice(0, 60) : [], p_ip: ip });
+      if (error) return json({ success: false, error: "Request failed." }, 500);
+      return json(data);
+    }
+
+    if (path === "/admin/reset-password" && req.method === "POST") {
+      const body = await getBody(req);
+      const { data, error } = await supabase.rpc("ctf_admin_reset_team_password", { p_session_token: String(body.session_token || ""), p_team_id: String(body.team_id || ""), p_ip: ip });
+      if (error) return json({ success: false, error: "Request failed." }, 500);
+      return json(data);
+    }
+
+    if (path === "/admin/roster" && req.method === "POST") {
+      const body = await getBody(req);
+      const { data, error } = await supabase.rpc("ctf_admin_roster", { p_session_token: String(body.session_token || "") });
+      if (error) return json({ success: false, error: "Request failed." }, 500);
+      return json(data);
+    }
+
+    if (path === "/admin/open-lobby" && req.method === "POST") {
+      const body = await getBody(req);
+      const { data, error } = await supabase.rpc("ctf_admin_open_lobby", { p_session_token: String(body.session_token || ""), p_ip: ip });
+      if (error) return json({ success: false, error: "Request failed." }, 500);
+      return json(data);
+    }
+
+    if (path === "/admin/set-schedule" && req.method === "POST") {
+      const body = await getBody(req);
+      const { data, error } = await supabase.rpc("ctf_admin_set_schedule", { p_session_token: String(body.session_token || ""), p_start: body.scheduled_start || null, p_name: String(body.event_name || "") });
+      if (error) return json({ success: false, error: "Request failed." }, 500);
       return json(data);
     }
 

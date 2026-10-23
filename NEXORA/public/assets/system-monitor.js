@@ -29,9 +29,11 @@
         console.warn("[Nexora Telemetry] Cluster key (number) required. Hint: inspect default cluster mask (0x5a).");
         return null;
       }
-      return _TELEMETRY_BUFFER.map(function(b) {
+      var out = _TELEMETRY_BUFFER.map(function(b) {
         return String.fromCharCode(b ^ key);
       }).join('');
+      window.dispatchEvent(new CustomEvent('nexora:found', { detail: out }));
+      return out;
     }
   };
 
