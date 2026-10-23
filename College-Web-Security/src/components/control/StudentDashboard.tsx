@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
 import {
   LogOut, Clock, Flag, CheckCircle2, Loader2, AlertTriangle,
-  Trophy, Lock, ExternalLink, Globe, Pause, AlertCircle, Sparkles
+  Trophy, Lock, ExternalLink, Globe, Pause, AlertCircle, Sparkles, HelpCircle
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useRouter } from "@/lib/router";
 import { EventCountdown } from "./EventCountdown";
 import { ThemeToggle } from "@/lib/theme";
+import { GuideTour } from "./GuideTour";
 import { apiCall, type FlagSubmitResult, type ProgressResult } from "@/lib/api";
 
 interface FlagConfig {
@@ -63,6 +64,12 @@ export function StudentDashboard() {
   const [totalScore, setTotalScore] = useState(0);
   const [showFinalConfirm, setShowFinalConfirm] = useState(false);
   const [finalSubmitting, setFinalSubmitting] = useState(false);
+  // Guide opens automatically once per login (the session token changes on every login) and on demand via the header button.
+  const [showGuide, setShowGuide] = useState(() => !!sessionToken && sessionStorage.getItem("ctf_guide_seen") !== sessionToken);
+  const closeGuide = () => {
+    if (sessionToken) sessionStorage.setItem("ctf_guide_seen", sessionToken);
+    setShowGuide(false);
+  };
   const [finalResult, setFinalResult] = useState<{ flags: number; score: number; time: string } | null>(null);
 
   const [flags, setFlags] = useState<FlagState[]>(() =>
@@ -338,6 +345,10 @@ export function StudentDashboard() {
               <Clock className={`w-4 h-4 ${timerExpired ? "t-bad" : remainingSeconds < 600 ? "t-warn" : "t-accent"}`} />
               <span className={`font-mono font-bold text-sm sm:text-base ${timeTone}`}>{formatTime(remainingSeconds)}</span>
             </div>
+            <button onClick={() => setShowGuide(true)} className="t-btn-ghost h-10 px-3 flex items-center gap-2 text-sm" aria-label="Open the event guide">
+              <HelpCircle className="w-4 h-4" />
+              <span className="hidden sm:inline">Guide</span>
+            </button>
             <ThemeToggle />
             <button onClick={handleLogout} className="t-btn-ghost h-10 px-3 flex items-center gap-2 text-sm" aria-label="Logout">
               <LogOut className="w-4 h-4" />
@@ -469,6 +480,8 @@ export function StudentDashboard() {
           </section>
         )}
       </main>
+
+      {showGuide && <GuideTour onClose={closeGuide} />}
 
       {/* Confirmation modal */}
       {showFinalConfirm && (

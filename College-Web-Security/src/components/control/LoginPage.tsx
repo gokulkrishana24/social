@@ -78,7 +78,7 @@ export function LoginPage() {
         </div>
 
         <div className="t-card p-7 sm:p-8">
-          <div className="flex items-center justify-between mb-6">
+          {/* <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-semibold t-fg">{mode === "login" ? "Team sign in" : "Register your team"}</h2>
             <button
               type="button"
@@ -87,7 +87,7 @@ export function LoginPage() {
             >
               {mode === "login" ? "New team?" : "Back to sign in"}
             </button>
-          </div>
+          </div> */}
 
           <EventCountdown />
 
@@ -156,12 +156,12 @@ export function LoginPage() {
             </button>
           </form>
 
-          <div className="mt-6 pt-5 border-t t-line">
+          {/* <div className="mt-6 pt-5 border-t t-line">
             <button onClick={() => navigate("/management")} className="w-full text-xs t-muted hover:t-accent transition-colors flex items-center justify-center gap-2">
               <Shield className="w-3.5 h-3.5" />
               Organizer / admin login
             </button>
-          </div>
+          </div> */}
         </div>
 
         <p className="text-center text-xs t-muted mt-6">

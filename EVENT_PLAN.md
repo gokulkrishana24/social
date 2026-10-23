@@ -54,6 +54,9 @@ Pause / Resume freezes every team's timer for a power or network problem (the lo
 - Change the start time in Teams & Check-in -> Scheduled start -> Save; teams' countdowns update within 30 seconds.
 - You must still press **Start** at the time. The schedule is a display/countdown; it does **not** start the event by itself (so you stay in control).
 
+## 4b. Team onboarding guide (built into the dashboard)
+After every login the team dashboard opens an 8-step **Guide** (what a CTF is, rules, opening the challenge site, how to hunt for flags in a browser, image forensics tools, submitting flags, scoring/finishing, getting unstuck). It does not reopen on a page refresh in the same login, but it does after every new login, and the **Guide** button in the header reopens it any time. Use the 08:50 briefing to tell teams to read it (about 3 minutes) before 09:00.
+
 ## 5. Hint policy (110 hints: 11 flags x 5 levels x 2 variants)
 - Hints live in the dashboard **Hints** tab, readable only with the organizer login (not in the team app and not readable through the public API).
 - Levels: 1 very high-level (hardest) -> 5 closest to the answer. Two variants (A/B) per level give a different angle.
