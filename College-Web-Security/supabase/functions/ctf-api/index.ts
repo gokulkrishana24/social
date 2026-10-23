@@ -239,6 +239,40 @@ Deno.serve(async (req: Request) => {
       return json(data);
     }
 
+    // ─── PAID HINTS ──────────────────────────────────────
+    if (path === "/hints/catalog" && req.method === "POST") {
+      const body = await getBody(req);
+      const token = String(body.session_token || "");
+      if (!token) return json({ success: false, error: "No session token." }, 400);
+      const { data, error } = await supabase.rpc("ctf_hint_catalog", { p_session_token: token });
+      if (error) return json({ success: false, error: "Failed to load hints." }, 500);
+      return json(data);
+    }
+
+    if (path === "/hints/buy" && req.method === "POST") {
+      const body = await getBody(req);
+      const token = String(body.session_token || "");
+      const flagNumber = Number(body.flag_number);
+      const level = Number(body.level);
+      if (!token || !Number.isInteger(flagNumber) || !Number.isInteger(level)) {
+        return json({ success: false, error: "Missing required fields." }, 400);
+      }
+      const rate = checkRate(submitAttempts, `hint:${token}`, 10, 60_000);
+      if (!rate.allowed) {
+        return json({ success: false, error: `Too many requests. Try again in ${rate.retryAfter}s.` }, 429);
+      }
+      const { data, error } = await supabase.rpc("ctf_buy_hint", { p_session_token: token, p_flag_number: flagNumber, p_level: level, p_ip: ip });
+      if (error) return json({ success: false, error: "Purchase failed." }, 500);
+      return json(data);
+    }
+
+    if (path === "/admin/hint-purchases" && req.method === "POST") {
+      const body = await getBody(req);
+      const { data, error } = await supabase.rpc("ctf_admin_hint_purchases", { p_session_token: String(body.session_token || "") });
+      if (error) return json({ success: false, error: "Request failed." }, 500);
+      return json(data);
+    }
+
     if (path === "/flags/progress" && req.method === "POST") {
       const body = await getBody(req);
       const token = String(body.session_token || "");

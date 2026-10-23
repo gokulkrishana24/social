@@ -63,6 +63,13 @@ After every login the team dashboard opens an 8-step **Guide** (what a CTF is, r
 - Suggested rule: a team asks a proctor -> proctor gives the next level they have not had (A first, then B). Log it on paper: team, flag, level. Hints are not auto-deducted from score; if you want a penalty, subtract points by hand (suggest -10% per level 3+ hint).
 - Never give level 5 before level 3 unless the team has been stuck >20 minutes on that flag.
 
+## 5a. Paid hints (self-service in the team dashboard)
+- **Buy hints** (header button, or "Stuck? Buy a deeper hint" on the open flag) opens a shop with instructions. Levels 2-5 cost **10 / 20 / 30 / 50 points**, the same for every team; each purchase reveals both hints of that level. Level 1 ("Direction") stays free.
+- Fairness rules enforced on the server: only for the flag the team is currently on; levels bought in order; only while the team's clock is running; no double charge; scores may go below zero so a team stuck on 0 points still gets the same chance and nobody gets hints free.
+- The cost is deducted from the team score immediately and is included in the final score and leaderboard. Organizers see every purchase in **Timeline -> Hint purchases** (and the audit log as HINT_PURCHASE).
+- Change a price: `update ctf_hint_costs set cost = 25 where level = 3;` (applies to future purchases for everyone).
+- Proctor hints: to keep it fair, send teams to the Buy hints button instead of giving free level 2-5 hints.
+
 ## 6. Watching the event (dashboard)
 - **Approvals**: pending device / takeover / registration requests, refreshes every 4 s. A *takeover* when the team is mid-run deserves a question to the proctor: why did they change device?
 - **Timeline**: every solve with the clock time, time since the team started, time since their previous solve (the "speed"), wrong attempts before it, and points.

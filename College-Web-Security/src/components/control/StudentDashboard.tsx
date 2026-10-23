@@ -1,13 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
 import {
   LogOut, Clock, Flag, CheckCircle2, Loader2, AlertTriangle,
-  Trophy, Lock, ExternalLink, Globe, Pause, AlertCircle, Sparkles, HelpCircle, Lightbulb
+  Trophy, Lock, ExternalLink, Globe, Pause, AlertCircle, Sparkles, HelpCircle, Lightbulb, Coins
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useRouter } from "@/lib/router";
 import { EventCountdown } from "./EventCountdown";
 import { ThemeToggle } from "@/lib/theme";
 import { GuideTour } from "./GuideTour";
+import { HintShop } from "./HintShop";
 import { apiCall, type FlagSubmitResult, type ProgressResult } from "@/lib/api";
 
 interface FlagConfig {
@@ -67,6 +68,7 @@ export function StudentDashboard() {
   const [finalSubmitting, setFinalSubmitting] = useState(false);
   // Guide opens automatically once per login (the session token changes on every login) and on demand via the header button.
   const [showGuide, setShowGuide] = useState(() => !!sessionToken && sessionStorage.getItem("ctf_guide_seen") !== sessionToken);
+  const [showShop, setShowShop] = useState(false);
   const closeGuide = () => {
     if (sessionToken) sessionStorage.setItem("ctf_guide_seen", sessionToken);
     setShowGuide(false);
@@ -353,6 +355,10 @@ export function StudentDashboard() {
               <Clock className={`w-4 h-4 ${timerExpired ? "t-bad" : remainingSeconds < 600 ? "t-warn" : "t-accent"}`} />
               <span className={`font-mono font-bold text-sm sm:text-base ${timeTone}`}>{formatTime(remainingSeconds)}</span>
             </div>
+            <button onClick={() => setShowShop(true)} className="t-btn-ghost h-10 px-3 flex items-center gap-2 text-sm" aria-label="Buy hints">
+              <Coins className="w-4 h-4" />
+              <span className="hidden sm:inline">Buy hints</span>
+            </button>
             <button onClick={() => setShowGuide(true)} className="t-btn-ghost h-10 px-3 flex items-center gap-2 text-sm" aria-label="Open the event guide">
               <HelpCircle className="w-4 h-4" />
               <span className="hidden sm:inline">Guide</span>
@@ -463,6 +469,7 @@ export function StudentDashboard() {
                 flag={flag}
                 nextHint={flags[i + 1] && flags[i + 1].status !== "correct" ? nextHints[i + 1] : undefined}
                 direction={nextHints[i]}
+                onBuyHint={() => setShowShop(true)}
                 remainingSeconds={remainingSeconds}
                 disabled={submissionsDisabled}
                 onChange={(value) => setFlags((prev) => prev.map((f, idx) => (idx === i ? { ...f, inputValue: value } : f)))}
@@ -494,6 +501,9 @@ export function StudentDashboard() {
       </main>
 
       {showGuide && <GuideTour onClose={closeGuide} />}
+      {showShop && sessionToken && (
+        <HintShop sessionToken={sessionToken} canBuy={!submissionsDisabled} onClose={() => setShowShop(false)} onChanged={() => { loadProgress(); refreshSession(); }} />
+      )}
 
       {/* Confirmation modal */}
       {showFinalConfirm && (
@@ -527,6 +537,7 @@ function FlagSlot({
   flag,
   nextHint,
   direction,
+  onBuyHint,
   remainingSeconds,
   disabled,
   onChange,
@@ -536,6 +547,7 @@ function FlagSlot({
   flag: FlagState;
   nextHint?: string;
   direction?: string; // high-level pointer for THIS flag, shown on the open card
+  onBuyHint?: () => void;
   remainingSeconds: number;
   disabled: boolean;
   onChange: (value: string) => void;
@@ -619,6 +631,11 @@ function FlagSlot({
             </button>
           </div>
           {flag.feedback && <p className={`text-xs mt-2 ${flag.status === "wrong" ? "t-bad" : "t-muted"}`}>{flag.feedback}</p>}
+          {onBuyHint && (
+            <button onClick={onBuyHint} className="mt-2 text-[11px] t-accent hover:underline flex items-center gap-1">
+              <Lightbulb className="w-3 h-3" /> Stuck? Buy a deeper hint
+            </button>
+          )}
           <div className="flex items-center justify-between text-[11px] t-muted mt-2 font-mono">
             <span>{flag.maxPoints} → {flag.minPoints} pts</span>
             {flag.attempts > 0 && <span>{flag.attempts} attempt{flag.attempts !== 1 ? "s" : ""}</span>}

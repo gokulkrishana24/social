@@ -11,6 +11,7 @@ import {
   type AuditLogResult, type ExportResult, type RunHistoryResult, type RunHistoryEntry,
 } from "@/lib/api";
 import { RosterPanel } from "./RosterPanel";
+import { HintPurchasesTable } from "./HintPurchasesTable";
 
 type View = "overview" | "roster" | "approvals" | "timeline" | "hints" | "logs" | "test" | "history";
 
@@ -184,7 +185,7 @@ export function AdminDashboard() {
 
         {view === "roster" && <RosterPanel sessionToken={sessionToken} runStatus={runStatus} hasRun={!!run?.id} />}
         {view === "approvals" && <ApprovalsPanel sessionToken={sessionToken} />}
-        {view === "timeline" && <TimelinePanel sessionToken={sessionToken} />}
+        {view === "timeline" && <><TimelinePanel sessionToken={sessionToken} /><HintPurchasesTable sessionToken={sessionToken} /></>}
         {view === "hints" && <HintsPanel sessionToken={sessionToken} />}
 
         {view === "overview" && (
