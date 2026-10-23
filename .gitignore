@@ -49,3 +49,6 @@ Photos and the hidden contents*
 # Supabase CLI local state
 **/supabase/.temp/
 /supabase/
+
+# Generated team credentials (passwords)
+TEAM_CREDENTIALS.xlsx
