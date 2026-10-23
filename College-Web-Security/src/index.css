@@ -1,3 +1,130 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ---------- Theme tokens (team-facing pages). <html data-theme="dark|light"> ---------- */
+:root,
+:root[data-theme="dark"] {
+  --bg: #070b14;
+  --bg-glow-a: rgba(34, 211, 238, 0.14);
+  --bg-glow-b: rgba(99, 102, 241, 0.14);
+  --card: rgba(15, 23, 42, 0.62);
+  --card-solid: #0f172a;
+  --field: rgba(30, 41, 59, 0.7);
+  --line: rgba(148, 163, 184, 0.16);
+  --line-strong: rgba(148, 163, 184, 0.3);
+  --fg: #f1f5f9;
+  --fg2: #cbd5e1;
+  --muted: #8b9ab0;
+  --accent: #22d3ee;
+  --accent-strong: #06b6d4;
+  --on-accent: #04202a;
+  --ok: #34d399;
+  --ok-bg: rgba(16, 185, 129, 0.12);
+  --warn: #fbbf24;
+  --warn-bg: rgba(245, 158, 11, 0.12);
+  --bad: #f87171;
+  --bad-bg: rgba(239, 68, 68, 0.12);
+  --info-bg: rgba(34, 211, 238, 0.1);
+  --shadow: 0 10px 40px -12px rgba(0, 0, 0, 0.6);
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --bg: #f4f7fb;
+  --bg-glow-a: rgba(6, 182, 212, 0.16);
+  --bg-glow-b: rgba(99, 102, 241, 0.13);
+  --card: rgba(255, 255, 255, 0.78);
+  --card-solid: #ffffff;
+  --field: #ffffff;
+  --line: rgba(15, 23, 42, 0.1);
+  --line-strong: rgba(15, 23, 42, 0.22);
+  --fg: #0f172a;
+  --fg2: #334155;
+  --muted: #64748b;
+  --accent: #0891b2;
+  --accent-strong: #0e7490;
+  --on-accent: #ffffff;
+  --ok: #059669;
+  --ok-bg: rgba(16, 185, 129, 0.12);
+  --warn: #b45309;
+  --warn-bg: rgba(245, 158, 11, 0.14);
+  --bad: #dc2626;
+  --bad-bg: rgba(239, 68, 68, 0.1);
+  --info-bg: rgba(8, 145, 178, 0.09);
+  --shadow: 0 10px 30px -14px rgba(15, 23, 42, 0.25);
+  color-scheme: light;
+}
+
+@layer components {
+  .t-page {
+    min-height: 100vh;
+    color: var(--fg);
+    background:
+      radial-gradient(60rem 30rem at 85% -10%, var(--bg-glow-a), transparent 60%),
+      radial-gradient(50rem 28rem at -10% 110%, var(--bg-glow-b), transparent 60%),
+      var(--bg);
+    transition: background-color 0.25s, color 0.25s;
+  }
+  .t-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 1rem;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(14px);
+  }
+  .t-card-solid { background: var(--card-solid); border: 1px solid var(--line); border-radius: 1rem; box-shadow: var(--shadow); }
+  .t-field {
+    background: var(--field);
+    border: 1px solid var(--line-strong);
+    color: var(--fg);
+    border-radius: 0.75rem;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .t-field::placeholder { color: var(--muted); }
+  .t-field:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--info-bg); }
+  .t-btn {
+    background: linear-gradient(135deg, var(--accent-strong), #6366f1);
+    color: #fff;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    box-shadow: 0 8px 24px -10px var(--accent-strong);
+    transition: transform 0.12s, filter 0.15s, opacity 0.15s;
+  }
+  .t-btn:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); }
+  .t-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .t-btn-ghost {
+    background: transparent;
+    color: var(--fg2);
+    border: 1px solid var(--line-strong);
+    border-radius: 0.75rem;
+    transition: background 0.15s, color 0.15s;
+  }
+  .t-btn-ghost:hover { background: var(--info-bg); color: var(--fg); }
+  .t-fg { color: var(--fg); }
+  .t-fg2 { color: var(--fg2); }
+  .t-muted { color: var(--muted); }
+  .t-accent { color: var(--accent); }
+  .t-ok { color: var(--ok); }
+  .t-warn { color: var(--warn); }
+  .t-bad { color: var(--bad); }
+  .t-line { border-color: var(--line); }
+  .t-banner-info { background: var(--info-bg); border: 1px solid var(--line-strong); color: var(--fg2); border-radius: 0.875rem; }
+  .t-banner-ok { background: var(--ok-bg); border: 1px solid var(--ok); color: var(--fg2); border-radius: 0.875rem; }
+  .t-banner-warn { background: var(--warn-bg); border: 1px solid var(--warn); color: var(--fg2); border-radius: 0.875rem; }
+  .t-banner-bad { background: var(--bad-bg); border: 1px solid var(--bad); color: var(--fg2); border-radius: 0.875rem; }
+  .t-chip { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.04em; padding: 0.15rem 0.5rem; border-radius: 999px; border: 1px solid var(--line-strong); color: var(--muted); }
+  .t-chip-easy { color: var(--accent); background: var(--info-bg); border-color: transparent; }
+  .t-chip-med { color: var(--warn); background: var(--warn-bg); border-color: transparent; }
+  .t-chip-hard { color: var(--bad); background: var(--bad-bg); border-color: transparent; }
+  .t-flag { border-radius: 1rem; border: 1px solid var(--line); background: var(--card); transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s; }
+  .t-flag-open { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), var(--shadow); }
+  .t-flag-open:hover { transform: translateY(-2px); }
+  .t-flag-done { border-color: var(--ok); background: var(--ok-bg); }
+  .t-flag-locked { opacity: 0.55; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}

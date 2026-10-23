@@ -29,11 +29,11 @@ export function EventCountdown() {
   const left = Math.max(0, Math.floor((info.start - (Date.now() + info.skew)) / 1000));
   const h = Math.floor(left / 3600), m = Math.floor((left % 3600) / 60), s = left % 60;
   return (
-    <div className="flex items-center gap-3 bg-cyan-500/10 border border-cyan-500/30 rounded-lg p-3 mb-5">
-      <Clock className="w-5 h-5 text-cyan-400 flex-shrink-0" />
-      <p className="text-cyan-200 text-sm">
-        {info.name} starts at {new Date(info.start).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-        {left > 0 ? ` - in ${h ? `${h}h ` : ""}${String(m).padStart(2, "0")}m ${String(s).padStart(2, "0")}s` : " - waiting for the organizer to press Start"}
+    <div className="t-banner-info flex items-center gap-3 p-3 mb-5">
+      <Clock className="w-5 h-5 t-accent flex-shrink-0" />
+      <p className="text-sm">
+        <span className="font-semibold t-fg">{info.name}</span> starts at {new Date(info.start).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+        {left > 0 ? <span className="t-accent font-mono"> · in {h ? `${h}h ` : ""}{String(m).padStart(2, "0")}m {String(s).padStart(2, "0")}s</span> : " · waiting for the organizer to press Start"}
       </p>
     </div>
   );

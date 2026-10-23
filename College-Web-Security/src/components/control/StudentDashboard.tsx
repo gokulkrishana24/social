@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import {
-  LogOut, Clock, Flag, CheckCircle2, XCircle, Loader2, AlertTriangle,
-  Trophy, Lock, Unlock, ExternalLink, Globe, Pause, AlertCircle, Sparkles, Award
+  LogOut, Clock, Flag, CheckCircle2, Loader2, AlertTriangle,
+  Trophy, Lock, ExternalLink, Globe, Pause, AlertCircle, Sparkles
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useRouter } from "@/lib/router";
 import { EventCountdown } from "./EventCountdown";
+import { ThemeToggle } from "@/lib/theme";
 import { apiCall, type FlagSubmitResult, type ProgressResult } from "@/lib/api";
 
 interface FlagConfig {
@@ -266,8 +267,8 @@ export function StudentDashboard() {
 
   if (!team) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-cyan-500 animate-spin" />
+      <div className="t-page flex items-center justify-center">
+        <Loader2 className="w-8 h-8 t-accent animate-spin" />
       </div>
     );
   }
@@ -285,63 +286,60 @@ export function StudentDashboard() {
 
   if (isCompleted && finalResult) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4">
+      <div className="t-page flex items-center justify-center px-4 relative">
+        <div className="absolute top-4 right-4"><ThemeToggle /></div>
         <div className="max-w-md w-full text-center">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 mb-6 shadow-lg shadow-amber-500/20">
-            <Trophy className="w-10 h-10 text-white" />
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl t-btn mb-6">
+            <Trophy className="w-10 h-10" />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Competition Complete</h1>
-          <p className="text-slate-400 mb-8">All 11 flags submitted. Your final ranking is recorded.</p>
-          <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-8 mb-6">
-            <div className="text-5xl font-bold text-cyan-400 mb-1">{finalResult.score} pts</div>
-            <p className="text-slate-400 text-sm mb-4">Total Competition Score</p>
-            <div className="pt-4 border-t border-slate-800 grid grid-cols-2 gap-4 text-center">
+          <h1 className="text-3xl font-bold t-fg mb-2">Competition complete</h1>
+          <p className="t-muted mb-8">All 11 flags submitted. Your final ranking is recorded.</p>
+          <div className="t-card p-8 mb-6">
+            <div className="text-5xl font-bold t-accent mb-1">{finalResult.score}<span className="text-xl t-muted ml-2">pts</span></div>
+            <p className="t-muted text-sm mb-4">Total competition score</p>
+            <div className="pt-4 border-t t-line grid grid-cols-2 gap-4 text-center">
               <div>
-                <p className="text-xs text-slate-400">Flags Found</p>
-                <p className="text-lg font-bold text-white">{finalResult.flags}/11</p>
+                <p className="text-xs t-muted">Flags found</p>
+                <p className="text-lg font-bold t-fg">{finalResult.flags}/11</p>
               </div>
               <div>
-                <p className="text-xs text-slate-400">Completion Time</p>
-                <p className="text-lg font-bold text-white">{finalResult.time}</p>
+                <p className="text-xs t-muted">Completion time</p>
+                <p className="text-lg font-bold t-fg">{finalResult.time}</p>
               </div>
             </div>
           </div>
-          <button
-            onClick={handleLogout}
-            className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors font-medium"
-          >
-            Log Out
-          </button>
+          <button onClick={handleLogout} className="t-btn-ghost px-6 py-3 font-medium">Log out</button>
         </div>
       </div>
     );
   }
 
+  const stateLabel = isCompleted ? "Completed" : isPaused ? "Paused" : isForceFinished ? "Force finished" : competitionEnded ? "Ended" : isExpired ? "Expired" : isDisabled ? "Disabled" : competitionNotStarted ? "Waiting" : "Active";
+  const stateTone = isCompleted || (!isPaused && !isDisabled && !isExpired && !isForceFinished && !competitionEnded && !competitionNotStarted) ? "t-ok" : isPaused || competitionNotStarted ? "t-warn" : "t-bad";
+  const timeTone = timerExpired ? "t-bad" : remainingSeconds < 600 ? "t-warn" : "t-fg";
+  const RING = 2 * Math.PI * 34;
+
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
+    <div className="t-page">
       {/* Header */}
-      <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-xl sticky top-0 z-40">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
-              <Flag className="w-5 h-5 text-white" />
+      <header className="sticky top-0 z-40 border-b t-line backdrop-blur-xl" style={{ background: "var(--card)" }}>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl t-btn flex items-center justify-center flex-shrink-0">
+              <Flag className="w-5 h-5" />
             </div>
-            <div>
-              <h1 className="font-bold text-white text-sm sm:text-base">{team.team_name}</h1>
-              <p className="text-xs text-slate-400 font-mono">{team.team_code}</p>
+            <div className="min-w-0">
+              <h1 className="font-bold t-fg text-sm sm:text-base truncate">{team.team_name}</h1>
+              <p className="text-xs t-muted font-mono">{team.team_code}</p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Clock className={`w-5 h-5 ${timerExpired ? "text-red-400" : remainingSeconds < 600 ? "text-amber-400" : "text-cyan-400"}`} />
-              <span className={`font-mono font-bold text-sm sm:text-lg ${timerExpired ? "text-red-400" : remainingSeconds < 600 ? "text-amber-400" : "text-white"}`}>
-                {formatTime(remainingSeconds)}
-              </span>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="t-card-solid flex items-center gap-2 px-3 py-2 !rounded-xl">
+              <Clock className={`w-4 h-4 ${timerExpired ? "t-bad" : remainingSeconds < 600 ? "t-warn" : "t-accent"}`} />
+              <span className={`font-mono font-bold text-sm sm:text-base ${timeTone}`}>{formatTime(remainingSeconds)}</span>
             </div>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 px-3 py-2 text-sm text-slate-400 hover:text-white bg-slate-800/50 hover:bg-slate-800 rounded-lg transition-colors"
-            >
+            <ThemeToggle />
+            <button onClick={handleLogout} className="t-btn-ghost h-10 px-3 flex items-center gap-2 text-sm" aria-label="Logout">
               <LogOut className="w-4 h-4" />
               <span className="hidden sm:inline">Logout</span>
             </button>
@@ -349,112 +347,94 @@ export function StudentDashboard() {
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Status banner */}
         {competitionNotStarted && <EventCountdown />}
         {(competitionNotStarted || isExpired || isDisabled || isPaused || isForceFinished || competitionEnded) && (
-          <div className={`flex items-center gap-3 rounded-xl p-4 mb-6 border ${
-            isDisabled ? "bg-red-500/11 border-red-500/30" :
-            isPaused ? "bg-amber-500/11 border-amber-500/30" :
-            isForceFinished || competitionEnded ? "bg-red-500/11 border-red-500/30" :
-            isExpired ? "bg-orange-500/11 border-orange-500/30" :
-            "bg-blue-500/11 border-blue-500/30"
-          }`}>
-            {isPaused ? <Pause className="w-5 h-5 flex-shrink-0 text-amber-400" /> : <AlertTriangle className={`w-5 h-5 flex-shrink-0 ${
-              isDisabled ? "text-red-400" : isExpired ? "text-orange-400" : "text-blue-400"
-            }`} />}
-            <p className="text-sm text-slate-300">
+          <div className={`${isPaused || competitionNotStarted ? "t-banner-warn" : "t-banner-bad"} flex items-center gap-3 p-4 mb-6`}>
+            {isPaused ? <Pause className="w-5 h-5 flex-shrink-0 t-warn" /> : <AlertTriangle className={`w-5 h-5 flex-shrink-0 ${competitionNotStarted ? "t-warn" : "t-bad"}`} />}
+            <p className="text-sm">
               {isPaused
-                ? "The competition is currently paused. Your timer and point decay are frozen. Submissions will be re-enabled when the competition resumes."
+                ? "The competition is paused. Your timer and point decay are frozen; submissions return when it resumes."
                 : isForceFinished
-                ? "The competition has been force-finished by the organizer. No further submissions are accepted."
+                ? "The competition was force-finished by the organizer. No further submissions are accepted."
                 : competitionEnded
                 ? "The competition has ended. No further submissions are accepted."
                 : isDisabled
                 ? "Your team account has been disabled by the organizer."
                 : isExpired
                 ? "Your competition time has expired. No further submissions are accepted."
-                : "The competition has not started yet. Please wait for the organizer to begin the competition."}
+                : "The competition has not started yet. Wait for the organizer to begin; every clock starts together."}
             </p>
           </div>
         )}
 
-        {/* Progress summary cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-8">
-          <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4 sm:p-5">
-            <p className="text-xs text-slate-400 mb-1">Flags Solved</p>
-            <p className="text-2xl sm:text-3xl font-bold text-cyan-400">{totalSolved}<span className="text-slate-500 text-lg">/11</span></p>
-          </div>
-          <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4 sm:p-5">
-            <p className="text-xs text-slate-400 mb-1">Total Score</p>
-            <p className="text-2xl sm:text-3xl font-bold text-amber-400 font-mono">{totalScore}<span className="text-slate-500 text-sm font-sans font-normal ml-1">pts</span></p>
-          </div>
-          <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4 sm:p-5">
-            <p className="text-xs text-slate-400 mb-1">Time Remaining</p>
-            <p className={`text-2xl sm:text-3xl font-bold font-mono ${timerExpired ? "text-red-400" : remainingSeconds < 600 ? "text-amber-400" : "text-white"}`}>
-              {formatTime(remainingSeconds)}
-            </p>
-          </div>
-          <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4 sm:p-5">
-            <p className="text-xs text-slate-400 mb-1">Team Status</p>
-            <p className="text-lg sm:text-xl font-bold capitalize text-slate-200">
-              {isCompleted ? "Completed" : isPaused ? "Paused" : isForceFinished ? "Force Finished" : competitionEnded ? "Ended" : isExpired ? "Expired" : isDisabled ? "Disabled" : competitionNotStarted ? "Waiting" : "Active"}
-            </p>
-          </div>
-        </div>
-
-        {/* Challenge website link */}
-        <div className="bg-gradient-to-br from-slate-900 to-slate-800/50 border border-slate-700 rounded-2xl p-5 sm:p-6 mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 flex items-center justify-center flex-shrink-0">
-                <Globe className="w-6 h-6 text-cyan-400" />
-              </div>
-              <div>
-                <h2 className="text-base font-semibold text-white mb-1">Challenge Website — NEXORA SYSTEMS</h2>
-                <p className="text-sm text-slate-400 max-w-md">
-                  Investigate NEXORA to discover the 11 sequential flags. Solve each flag in order to unlock the subsequent challenge.
-                </p>
-                <ul className="mt-3 text-xs text-slate-400 space-y-1 list-disc pl-4 max-w-xl">
-                  <li><span className="text-slate-200">Always open the site with the button here</span>; its bottom-left badge must say "Team linked". Then flags are credited automatically.</li>
-                  <li><span className="text-slate-200">Scope:</span> the NEXORA website and the files it serves (pages, scripts, images, downloads). Nothing else is a target.</li>
-                  <li><span className="text-slate-200">Flags look like</span> <code>NEXORA&#123;...&#125;</code>. Found one? Press Ctrl+V on the NEXORA page (or type it in the box below).</li>
-                  <li><span className="text-slate-200">Start here:</span> flag 1 hides in how the About page is built. Use your browser's View Source (Ctrl+U) or Inspect (F12 &rarr; Elements) and search for "Flag". Later flags use DevTools (Network, Console, Application), recon of public files, SQL, and image forensics (exiftool, zsteg/stegano, binwalk, steghide).</li>
-                  <li><span className="text-slate-200">Stuck?</span> Ask a proctor for a hint. One device per team; the 3-hour clock is shown above.</li>
-                </ul>
-                {!challengeUrl && !isDev && (
-                  <div className="flex items-center gap-2 mt-3 text-red-400">
-                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                    <p className="text-xs">
-                      Configuration error: VITE_CHALLENGE_SITE_URL is not set for production.
-                    </p>
-                  </div>
-                )}
+        {/* Hero: progress ring + stats */}
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+          <div className="t-card p-6 flex items-center gap-6 lg:col-span-1">
+            <div className="relative w-24 h-24 flex-shrink-0">
+              <svg viewBox="0 0 80 80" className="w-24 h-24 -rotate-90">
+                <circle cx="40" cy="40" r="34" fill="none" stroke="var(--line-strong)" strokeWidth="7" />
+                <circle cx="40" cy="40" r="34" fill="none" stroke="var(--accent)" strokeWidth="7" strokeLinecap="round"
+                  strokeDasharray={RING} strokeDashoffset={RING * (1 - totalSolved / 11)} style={{ transition: "stroke-dashoffset .6s" }} />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-2xl font-bold t-fg leading-none">{totalSolved}</span>
+                <span className="text-[10px] t-muted">of 11</span>
               </div>
             </div>
-            <button
-              onClick={openChallenge}
-              className="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-cyan-500/20 whitespace-nowrap"
-            >
-              <ExternalLink className="w-4 h-4" />
-              Open Challenge Website
-            </button>
+            <div>
+              <p className="text-xs t-muted mb-1">Total score</p>
+              <p className="text-4xl font-bold t-accent font-mono leading-none">{totalScore}<span className="text-sm t-muted font-sans font-normal ml-1">pts</span></p>
+              <p className={`text-xs mt-2 font-medium ${stateTone}`}>● {stateLabel}</p>
+            </div>
           </div>
-        </div>
 
-        {/* Sequential Flag Submissions */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-              <Flag className="w-5 h-5 text-cyan-400" />
-              Sequential Challenge Track (11 Flags)
+          {/* Challenge website + how to play */}
+          <div className="t-card p-6 lg:col-span-2">
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "var(--info-bg)" }}>
+                  <Globe className="w-5 h-5 t-accent" />
+                </div>
+                <div>
+                  <h2 className="text-base font-semibold t-fg">Challenge website: NEXORA Systems</h2>
+                  <p className="text-sm t-muted mt-0.5">Investigate it to find 11 sequential flags. Solve each to unlock the next.</p>
+                </div>
+              </div>
+              <button onClick={openChallenge} className="t-btn flex items-center justify-center gap-2 px-5 py-3 whitespace-nowrap text-sm">
+                <ExternalLink className="w-4 h-4" />
+                Open challenge site
+              </button>
+            </div>
+            <ul className="mt-4 grid sm:grid-cols-2 gap-x-6 gap-y-2 text-xs t-muted">
+              <li><span className="t-fg2 font-medium">Open it from this button</span>; the badge bottom-left must say "Team linked" so flags are credited automatically.</li>
+              <li><span className="t-fg2 font-medium">Scope:</span> the NEXORA site and the files it serves. Nothing else is a target.</li>
+              <li><span className="t-fg2 font-medium">Found a flag?</span> It looks like <code>NEXORA&#123;...&#125;</code>. Press Ctrl+V on the NEXORA page, or use the boxes below.</li>
+              <li><span className="t-fg2 font-medium">Start here:</span> flag 1 hides in how the About page is built; try View Source (Ctrl+U) or Inspect (F12) and search for "Flag".</li>
+              <li><span className="t-fg2 font-medium">Tools:</span> DevTools (Network, Console, Application), exiftool, zsteg/stegano, binwalk, steghide.</li>
+              <li><span className="t-fg2 font-medium">Stuck?</span> Ask a proctor for a hint. One device per team.</li>
+            </ul>
+            {!challengeUrl && !isDev && (
+              <div className="flex items-center gap-2 mt-3 t-bad">
+                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                <p className="text-xs">Configuration error: VITE_CHALLENGE_SITE_URL is not set for production.</p>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Flags */}
+        <section className="mb-8">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <h2 className="text-lg font-semibold t-fg flex items-center gap-2">
+              <Flag className="w-5 h-5 t-accent" />
+              Challenge track
             </h2>
-            <span className="text-xs text-slate-400 font-mono">
-              Dynamic Decay: S_min + (S_max - S_min) * (T_rem / 10800)
-            </span>
+            <span className="text-xs t-muted font-mono">points decay with time: S_min + (S_max - S_min) × (T_rem / 10800)</span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
             {flags.map((flag, i) => (
               <FlagSlot
                 key={i}
@@ -467,63 +447,47 @@ export function StudentDashboard() {
               />
             ))}
           </div>
-        </div>
+        </section>
 
-        {/* Final Submission Gated Option */}
+        {/* Final Submission */}
         {!submissionsDisabled && (
-          <div className="border-t border-slate-800 pt-6">
+          <section className="border-t t-line pt-6">
             {totalSolved >= 11 ? (
-              <button
-                onClick={() => setShowFinalConfirm(true)}
-                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white font-semibold py-4 rounded-xl transition-all shadow-lg shadow-amber-500/20"
-              >
+              <button onClick={() => setShowFinalConfirm(true)} className="t-btn w-full flex items-center justify-center gap-2 py-4">
                 <Trophy className="w-5 h-5" />
-                Submit Final Results (11/11 Flags Completed)
+                Submit final results (11/11 flags)
               </button>
             ) : (
-              <div className="bg-slate-900/40 border border-slate-800 rounded-xl p-5 text-center">
-                <div className="flex items-center justify-center gap-2 text-slate-400 text-sm font-semibold mb-1">
-                  <Lock className="w-4 h-4 text-amber-500" />
-                  <span>Final Submission Locked ({totalSolved}/11 Flags Solved)</span>
+              <div className="t-card p-5 text-center">
+                <div className="flex items-center justify-center gap-2 t-fg2 text-sm font-semibold mb-1">
+                  <Lock className="w-4 h-4 t-warn" />
+                  <span>Final submission locked ({totalSolved}/11 flags solved)</span>
                 </div>
-                <p className="text-xs text-slate-500">
-                  Per competition rules, teams must solve all 11 flags sequentially before final submission can be submitted.
-                </p>
+                <p className="text-xs t-muted">Solve all 11 flags in order to unlock the final submission.</p>
               </div>
             )}
-          </div>
+          </section>
         )}
       </main>
 
       {/* Confirmation modal */}
       {showFinalConfirm && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 max-w-md w-full">
+          <div className="t-card-solid p-6 max-w-md w-full">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center">
-                <Trophy className="w-6 h-6 text-amber-400" />
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: "var(--warn-bg)" }}>
+                <Trophy className="w-6 h-6 t-warn" />
               </div>
-              <h3 className="text-xl font-bold text-white">Final Submission Confirmation</h3>
+              <h3 className="text-xl font-bold t-fg">Final submission</h3>
             </div>
-            <p className="text-slate-300 mb-2">
-              Congratulations! You have completed all <span className="font-bold text-cyan-400">11/11</span> challenges with a total score of <span className="font-bold text-amber-400">{totalScore} pts</span>.
+            <p className="t-fg2 mb-2">
+              You completed all <span className="font-bold t-accent">11/11</span> challenges with <span className="font-bold t-warn">{totalScore} pts</span>.
             </p>
-            <p className="text-slate-400 text-sm mb-6">
-              Submitting now will record your official finish time and lock your score on the leaderboard.
-            </p>
+            <p className="t-muted text-sm mb-6">Submitting records your official finish time and locks your score.</p>
             <div className="flex gap-3">
-              <button
-                onClick={() => setShowFinalConfirm(false)}
-                className="flex-1 px-4 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleFinalSubmit}
-                disabled={finalSubmitting}
-                className="flex-1 px-4 py-3 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white font-semibold rounded-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                {finalSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : "Confirm Final Submission"}
+              <button onClick={() => setShowFinalConfirm(false)} className="t-btn-ghost flex-1 px-4 py-3">Cancel</button>
+              <button onClick={handleFinalSubmit} disabled={finalSubmitting} className="t-btn flex-1 px-4 py-3 flex items-center justify-center gap-2">
+                {finalSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : "Confirm"}
               </button>
             </div>
           </div>
@@ -550,65 +514,46 @@ function FlagSlot({
 }) {
   const isSolved = flag.status === "correct";
   const isLocked = flag.status === "locked";
-  const isAvailable = flag.status === "available" || flag.status === "wrong";
   const currentWorth = calculateDecayPoints(flag.maxPoints, flag.minPoints, remainingSeconds);
+  const chip = flag.difficulty === "HARD" ? "t-chip-hard" : flag.difficulty === "MEDIUM" ? "t-chip-med" : "t-chip-easy";
 
   return (
-    <div
-      className={`rounded-xl border p-4 transition-all ${
-        isSolved
-          ? "bg-emerald-500/5 border-emerald-500/30"
-          : isLocked
-          ? "bg-slate-900/30 border-slate-800/60 opacity-60"
-          : "bg-slate-900/80 border-cyan-500/40 shadow-lg shadow-cyan-500/5"
-      }`}
-    >
+    <div className={`t-flag p-4 ${isSolved ? "t-flag-done" : isLocked ? "t-flag-locked" : "t-flag-open"}`}>
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-mono text-slate-400">FLAG</span>
-          <span className="text-sm font-bold text-white">{String(flagNumber).padStart(2, "0")}</span>
-          <span
-            className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-              flag.difficulty === "HARD"
-                ? "bg-red-500/20 text-red-400 border border-red-500/30"
-                : flag.difficulty === "MEDIUM"
-                ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
-                : "bg-blue-500/20 text-blue-400 border border-blue-500/30"
-            }`}
-          >
-            {flag.difficulty}
+          <span className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold font-mono t-fg" style={{ background: isSolved ? "var(--ok-bg)" : "var(--info-bg)" }}>
+            {String(flagNumber).padStart(2, "0")}
           </span>
+          <span className={`t-chip ${chip}`}>{flag.difficulty}</span>
         </div>
 
         {isSolved ? (
-          <div className="flex items-center gap-1.5 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 px-2.5 py-1 rounded-lg">
-            <CheckCircle2 className="w-3.5 h-3.5" />
+          <div className="flex items-center gap-1.5 t-ok">
+            <CheckCircle2 className="w-4 h-4" />
             <span className="text-xs font-bold font-mono">+{flag.pointsAwarded ?? flag.maxPoints} pts</span>
           </div>
         ) : isLocked ? (
-          <div className="flex items-center gap-1 text-slate-500 text-xs font-medium">
+          <div className="flex items-center gap-1 t-muted text-xs font-medium">
             <Lock className="w-3.5 h-3.5" />
             <span>Locked</span>
           </div>
         ) : (
-          <div className="flex items-center gap-1.5 bg-cyan-500/11 border border-cyan-500/30 text-cyan-300 px-2 py-0.5 rounded-lg text-xs font-mono">
-            <Sparkles className="w-3 h-3 text-cyan-400" />
-            <span>Worth ~{currentWorth} pts</span>
+          <div className="flex items-center gap-1.5 t-accent text-xs font-mono">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>~{currentWorth} pts</span>
           </div>
         )}
       </div>
 
       {isSolved ? (
-        <div className="flex items-center justify-between bg-emerald-500/11 rounded-lg px-3 py-2 text-xs">
-          <span className="text-emerald-300 font-medium">Completed</span>
-          <span className="text-slate-400 text-[11px] font-mono">
-            {flag.solvedAt ? new Date(flag.solvedAt).toLocaleTimeString() : "Verified"}
-          </span>
+        <div className="flex items-center justify-between rounded-lg px-3 py-2 text-xs" style={{ background: "var(--ok-bg)" }}>
+          <span className="t-ok font-medium">Completed</span>
+          <span className="t-muted text-[11px] font-mono">{flag.solvedAt ? new Date(flag.solvedAt).toLocaleTimeString() : "Verified"}</span>
         </div>
       ) : isLocked ? (
-        <div className="flex items-center gap-2 bg-slate-900/50 rounded-lg p-3 text-slate-500 text-xs">
-          <Lock className="w-4 h-4 text-slate-600 flex-shrink-0" />
-          <span>Locked. Complete Flag {flagNumber - 1} to unlock this challenge.</span>
+        <div className="flex items-center gap-2 text-xs t-muted rounded-lg p-3 border t-line">
+          <Lock className="w-4 h-4 flex-shrink-0" />
+          <span>Solve flag {flagNumber - 1} to unlock.</span>
         </div>
       ) : (
         <>
@@ -618,25 +563,21 @@ function FlagSlot({
               value={flag.inputValue}
               onChange={(e) => onChange(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && !disabled && !flag.submitting && flag.inputValue.trim() && onSubmit()}
-              placeholder="Enter flag value (e.g. NEXORA{...})"
+              placeholder="NEXORA{...}"
               disabled={disabled || flag.submitting}
-              className="flex-1 bg-slate-800/80 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 disabled:opacity-50 font-mono"
+              className="t-field flex-1 min-w-0 px-3 py-2 text-sm font-mono disabled:opacity-50"
             />
             <button
               onClick={onSubmit}
               disabled={disabled || flag.submitting || !flag.inputValue.trim()}
-              className="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-slate-950 rounded-lg text-sm font-semibold transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center"
+              className="t-btn px-4 py-2 text-sm flex items-center"
             >
               {flag.submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Submit"}
             </button>
           </div>
-          {flag.feedback && (
-            <p className={`text-xs mt-2 ${flag.status === "wrong" ? "text-red-400" : "text-slate-400"}`}>
-              {flag.feedback}
-            </p>
-          )}
-          <div className="flex items-center justify-between text-[11px] text-slate-500 mt-2 font-mono">
-            <span>Range: {flag.maxPoints} max → {flag.minPoints} min</span>
+          {flag.feedback && <p className={`text-xs mt-2 ${flag.status === "wrong" ? "t-bad" : "t-muted"}`}>{flag.feedback}</p>}
+          <div className="flex items-center justify-between text-[11px] t-muted mt-2 font-mono">
+            <span>{flag.maxPoints} → {flag.minPoints} pts</span>
             {flag.attempts > 0 && <span>{flag.attempts} attempt{flag.attempts !== 1 ? "s" : ""}</span>}
           </div>
         </>

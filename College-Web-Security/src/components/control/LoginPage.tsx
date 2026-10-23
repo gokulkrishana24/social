@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { Shield, Lock, User, AlertCircle, Loader2 } from "lucide-react";
+import { Shield, Lock, User, AlertCircle, Loader2, Users, ArrowRight } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useRouter } from "@/lib/router";
 import { apiCall, getDevice } from "@/lib/api";
+import { ThemeToggle } from "@/lib/theme";
 import { EventCountdown } from "./EventCountdown";
 
 export function LoginPage() {
@@ -12,7 +13,6 @@ export function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
   const [mode, setMode] = useState<"login" | "register">("login");
   const [teamName, setTeamName] = useState("");
   const [pending, setPending] = useState<{ id: string; kind: "DEVICE" | "REGISTRATION" } | null>(null);
@@ -62,122 +62,109 @@ export function LoginPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pending]);
 
+  const approved = error.startsWith("Registration approved");
+
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -left-40 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
-      </div>
+    <div className="t-page flex items-center justify-center px-4 py-10 relative">
+      <div className="absolute top-4 right-4"><ThemeToggle /></div>
 
       <div className="relative w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 mb-4 shadow-lg shadow-cyan-500/20">
-            <Shield className="w-8 h-8 text-white" />
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl t-btn mb-5">
+            <Shield className="w-8 h-8" />
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">CTF Competition Platform</h1>
-          <p className="text-slate-400 mt-2 text-sm">Web Security Capture The Flag</p>
+          <h1 className="text-3xl font-bold tracking-tight t-fg">CTF Competition</h1>
+          <p className="t-muted mt-2 text-sm">Web security &amp; steganography challenge</p>
         </div>
 
-        <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-2xl p-8 shadow-2xl">
-          <h2 className="text-lg font-semibold text-white mb-6">{mode === "login" ? "Team Login" : "Register Team"}</h2>
+        <div className="t-card p-7 sm:p-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-semibold t-fg">{mode === "login" ? "Team sign in" : "Register your team"}</h2>
+            <button
+              type="button"
+              onClick={() => { setMode(mode === "login" ? "register" : "login"); setError(""); }}
+              className="text-xs t-accent hover:underline"
+            >
+              {mode === "login" ? "New team?" : "Back to sign in"}
+            </button>
+          </div>
 
           <EventCountdown />
 
           {pending && (
-            <div className="flex items-start gap-3 bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 mb-5">
-              <Loader2 className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5 animate-spin" />
-              <p className="text-amber-200 text-sm">
+            <div className="t-banner-warn flex items-start gap-3 p-3 mb-5">
+              <Loader2 className="w-5 h-5 t-warn flex-shrink-0 mt-0.5 animate-spin" />
+              <p className="text-sm">
                 Waiting for organizer approval ({pending.kind === "REGISTRATION" ? "team registration" : "new device / session"}). Keep this page open.
               </p>
             </div>
           )}
 
           {error && (
-            <div className="flex items-start gap-3 bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-5">
-              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-              <p className="text-red-300 text-sm">{error}</p>
+            <div className={`${approved ? "t-banner-ok" : "t-banner-bad"} flex items-start gap-3 p-3 mb-5`}>
+              <AlertCircle className={`w-5 h-5 flex-shrink-0 mt-0.5 ${approved ? "t-ok" : "t-bad"}`} />
+              <p className="text-sm">{error}</p>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {mode === "register" && (
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Team Name</label>
-                <input
-                  value={teamName}
-                  onChange={(e) => setTeamName(e.target.value)}
-                  className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500"
-                  required
-                />
-              </div>
+              <label className="block">
+                <span className="block text-xs font-medium t-fg2 mb-1.5">Team name</span>
+                <div className="relative">
+                  <Users className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 t-muted" />
+                  <input value={teamName} onChange={(e) => setTeamName(e.target.value)} required className="t-field w-full pl-10 pr-4 py-3 text-sm" />
+                </div>
+              </label>
             )}
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Team ID</label>
+            <label className="block">
+              <span className="block text-xs font-medium t-fg2 mb-1.5">Team ID</span>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 t-muted" />
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="TEAM001"
+                  placeholder="TEAM022"
                   autoCapitalize="characters"
-                  className="w-full bg-slate-800/50 border border-slate-700 rounded-lg pl-11 pr-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-colors"
+                  autoComplete="username"
+                  className="t-field w-full pl-10 pr-4 py-3 text-sm"
                   required
                 />
               </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Password</label>
+            </label>
+            <label className="block">
+              <span className="block text-xs font-medium t-fg2 mb-1.5">Password</span>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 t-muted" />
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your team password"
-                  className="w-full bg-slate-800/50 border border-slate-700 rounded-lg pl-11 pr-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-colors"
+                  placeholder="Your team password"
+                  autoComplete="current-password"
+                  className="t-field w-full pl-10 pr-4 py-3 text-sm"
                   required
                 />
               </div>
-            </div>
+            </label>
 
-            <button
-              type="submit"
-              disabled={loading || !!pending}
-              className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold py-3 rounded-lg transition-all shadow-lg shadow-cyan-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Signing in...
-                </>
-              ) : (
-                mode === "login" ? "Enter Competition" : "Request Registration"
+            <button type="submit" disabled={loading || !!pending} className="t-btn w-full py-3 flex items-center justify-center gap-2">
+              {loading ? (<><Loader2 className="w-5 h-5 animate-spin" />Signing in...</>) : (
+                <>{mode === "login" ? "Enter competition" : "Request registration"}<ArrowRight className="w-4 h-4" /></>
               )}
             </button>
           </form>
 
-          <button
-            type="button"
-            onClick={() => { setMode(mode === "login" ? "register" : "login"); setError(""); }}
-            className="w-full mt-4 text-sm text-slate-400 hover:text-cyan-400 transition-colors"
-          >
-            {mode === "login" ? "New team? Request registration" : "Already approved? Back to login"}
-          </button>
-
-          <div className="mt-6 pt-5 border-t border-slate-800">
-            <button
-              onClick={() => navigate("/management")}
-              className="w-full text-sm text-slate-400 hover:text-cyan-400 transition-colors flex items-center justify-center gap-2"
-            >
-              <Shield className="w-4 h-4" />
-              Organizer / Admin Login
+          <div className="mt-6 pt-5 border-t t-line">
+            <button onClick={() => navigate("/management")} className="w-full text-xs t-muted hover:t-accent transition-colors flex items-center justify-center gap-2">
+              <Shield className="w-3.5 h-3.5" />
+              Organizer / admin login
             </button>
           </div>
         </div>
 
-        <p className="text-center text-xs text-slate-500 mt-6">
+        <p className="text-center text-xs t-muted mt-6">
           One device per team at a time. New devices and registrations need organizer approval.
         </p>
       </div>
