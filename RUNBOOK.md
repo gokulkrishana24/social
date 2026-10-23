@@ -33,6 +33,9 @@ npx supabase secrets set CTF_ALLOWED_ORIGINS=https://your-dashboard,https://your
 ```
 Moving to a new project: link it, run the same commands, then update both `.env` files with the new URL and anon key.
 
+## 4a. Vercel (done)
+Projects `nexora-ctf-control` (folder College-Web-Security) and `nexora-ctf-site` (folder NEXORA), team `rpx`. Redeploy after a change: `cd <folder> && npx vercel deploy --prod --yes`. Env vars are set in Vercel (Project -> Settings -> Environment Variables); the anon key is public by design.
+
 ## 4. Build for hosting
 ```bash
 cd College-Web-Security && npm run build
@@ -55,7 +58,7 @@ Serve each `dist/` from any static host. NEXORA must be served from the site roo
 ## 6. Pre-event checklist
 - [x] Flag 10 embedded and extraction proven (2026-10-22). Re-run `python tools/verify_flags.py --live --steghide <path>` before the event: must print ALL VERIFIED
 - [x] Organizer password rotated 2026-10-22 (in ORGANIZER_CREDENTIALS_AND_SECRETS.md, gitignored); seeded TEAM001-020 disabled, real teams are added via Teams & Check-in
-- [ ] `CTF_ALLOWED_ORIGINS` set
+- [x] Deployed 2026-10-23: control https://nexora-ctf-control.vercel.app , NEXORA https://nexora-ctf-site.vercel.app ; `CTF_ALLOWED_ORIGINS` set to both (other origins get no CORS header)
 - [x] Live dry run 2026-10-22 (run 15): approval login, NEXORA link, all 11 flags auto-credited incl. out-of-order queue; found and fixed 2 DB bugs + 1 queue bug
 - [ ] Dry run with two browsers: login -> approval -> takeover -> flags 1-11 -> final submit
 - [ ] `grep -r "NEXORA{" NEXORA/dist` shows only flags 1 and 2 (intended)
