@@ -415,6 +415,13 @@ export function StudentDashboard() {
                 <p className="text-sm text-slate-400 max-w-md">
                   Investigate NEXORA to discover the 11 sequential flags. Solve each flag in order to unlock the subsequent challenge.
                 </p>
+                <ul className="mt-3 text-xs text-slate-400 space-y-1 list-disc pl-4 max-w-xl">
+                  <li><span className="text-slate-200">Always open the site with the button here</span>; its bottom-left badge must say "Team linked". Then flags are credited automatically.</li>
+                  <li><span className="text-slate-200">Scope:</span> the NEXORA website and the files it serves (pages, scripts, images, downloads). Nothing else is a target.</li>
+                  <li><span className="text-slate-200">Flags look like</span> <code>NEXORA&#123;...&#125;</code>. Found one? Press Ctrl+V on the NEXORA page (or type it in the box below).</li>
+                  <li><span className="text-slate-200">Start here:</span> flag 1 hides in how the About page is built. Use your browser's View Source (Ctrl+U) or Inspect (F12 &rarr; Elements) and search for "Flag". Later flags use DevTools (Network, Console, Application), recon of public files, SQL, and image forensics (exiftool, zsteg/stegano, binwalk, steghide).</li>
+                  <li><span className="text-slate-200">Stuck?</span> Ask a proctor for a hint. One device per team; the 3-hour clock is shown above.</li>
+                </ul>
                 {!challengeUrl && !isDev && (
                   <div className="flex items-center gap-2 mt-3 text-red-400">
                     <AlertCircle className="w-4 h-4 flex-shrink-0" />
