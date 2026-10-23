@@ -153,11 +153,10 @@ export function StudentDashboard() {
   const challengeUrl = import.meta.env.VITE_CHALLENGE_SITE_URL;
   const challengeTarget = (challengeUrl || "http://localhost:5174").replace(/\/+$/, "");
 
-  const openChallenge = () => {
-    // Auto-detect handoff: the session rides in the URL fragment, which is never sent to a server;
-    // NEXORA stores it and scrubs it from the address bar and history on load.
-    window.open(`${challengeTarget}/#link=${encodeURIComponent(sessionToken || "")}`, "nexora-challenge");
-  };
+  // Auto-detect handoff: the session rides in the URL fragment, which is never sent to a server;
+  // NEXORA stores it and scrubs it from the address bar and history on load.
+  // A real link (not window.open) so popup blockers never swallow it.
+  const challengeHref = `${challengeTarget}/#link=${encodeURIComponent(sessionToken || "")}`;
 
   // Countdown timer — purely visual, server is authoritative
   useEffect(() => {
@@ -413,10 +412,13 @@ export function StudentDashboard() {
                   <p className="text-sm t-muted mt-0.5">Investigate it to find 11 sequential flags. Solve each to unlock the next.</p>
                 </div>
               </div>
-              <button onClick={openChallenge} className="t-btn flex items-center justify-center gap-2 px-5 py-3 whitespace-nowrap text-sm">
-                <ExternalLink className="w-4 h-4" />
-                Open challenge site
-              </button>
+              <div className="flex flex-col items-stretch sm:items-end gap-1.5">
+                <a href={challengeHref} target="_blank" rel="noopener noreferrer" className="t-btn flex items-center justify-center gap-2 px-5 py-3 whitespace-nowrap text-sm">
+                  <ExternalLink className="w-4 h-4" />
+                  Open challenge site
+                </a>
+                <a href={challengeHref} className="text-[11px] t-muted hover:underline text-center sm:text-right">Not opening? Open it in this tab instead</a>
+              </div>
             </div>
             <ul className="mt-4 grid sm:grid-cols-2 gap-x-6 gap-y-2 text-xs t-muted">
               <li><span className="t-fg2 font-medium">Open it from this button</span>; the badge bottom-left must say "Team linked" so flags are credited automatically.</li>
