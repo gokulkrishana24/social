@@ -154,7 +154,7 @@ export function NexoraSite() {
       {linked && !briefed && (
         <div className="fixed top-20 right-4 z-50 max-w-xs rounded-xl bg-slate-900 text-slate-100 text-sm p-4 shadow-xl border border-cyan-500/40">
           <p className="font-semibold text-cyan-300 mb-1">CTF briefing</p>
-          <p className="text-slate-300">Everything on this site and the files it serves is in scope. Flags look like NEXORA{"{...}"}. Start with the About page: look at how it is built (Ctrl+U or F12). Press Ctrl+V anywhere on this page to submit a flag you found.</p>
+          <p className="text-slate-300">Everything on this site and the files it serves is in scope. Flags look like NEXORA{"{...}"}. Explore every page, then look underneath them with your browser tools (F12). Press Ctrl+V anywhere on this page to submit a flag you found.</p>
           <button onClick={() => { sessionStorage.setItem("nx_briefed", "1"); setBriefed(true); }} className="mt-3 px-3 py-1 rounded-lg bg-cyan-500 text-slate-900 font-semibold">Got it</button>
         </div>
       )}

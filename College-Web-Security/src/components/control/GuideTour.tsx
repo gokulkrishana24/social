@@ -22,9 +22,9 @@ const STEPS: Step[] = [
     title: "Welcome: what is this event?",
     body: (
       <>
-        <p>This is a <b className="t-fg">Capture The Flag (CTF)</b>, a hacking-style puzzle contest, and nothing you do here is harmful. A fictional company called <b className="t-fg">NEXORA Systems</b> has a website with <b className="t-fg">11 secrets hidden in it</b>. Each secret is a short piece of text called a <b className="t-fg">flag</b>.</p>
-        <p>A flag always looks like this: <Code>NEXORA&#123;some_text_here&#125;</Code></p>
-        <p>Your team's job: <b className="t-fg">investigate the website, find the flags, and submit them</b>. You do <i>not</i> need to know anything in advance. This guide explains every step, and you can reopen it any time with the <b className="t-fg">Guide</b> button at the top.</p>
+        <p>This is a <b className="t-fg">Capture The Flag (CTF)</b>: a puzzle contest where you play detective on a website. Nothing here is harmful, and <b className="t-fg">you do not need any experience</b>. This guide teaches you the skills you need, one step at a time.</p>
+        <p>A fictional company, <b className="t-fg">NEXORA Systems</b>, has a website with <b className="t-fg">11 secrets hidden in it</b>. Each secret is a short piece of text called a <b className="t-fg">flag</b>, and it always looks like this: <Code>NEXORA&#123;some_text_here&#125;</Code></p>
+        <p>Your team's job: <b className="t-fg">investigate, find the flags, and submit them.</b> The hiding places are different each time, so the idea is to learn <i>how to look</i>. You can reopen this guide whenever you like with the <b className="t-fg">Guide</b> button at the top.</p>
       </>
     ),
   },
@@ -33,71 +33,104 @@ const STEPS: Step[] = [
     title: "The rules of the game",
     body: (
       <ul className="space-y-2">
-        <Li><b className="t-fg">3 hours.</b> The clock at the top is your team's timer. Every team starts at the same moment.</Li>
-        <Li><b className="t-fg">One device per team.</b> Your whole team shares the logged-in laptop. Logging in somewhere else needs organizer approval and logs this one out.</Li>
-        <Li><b className="t-fg">In order.</b> Flags unlock one after another, 1 to 11. You cannot skip ahead, so if you are stuck, ask for a hint.</Li>
-        <Li><b className="t-fg">Points drop over time.</b> A flag is worth more the sooner you solve it (the "~pts" number on each card shows what it is worth right now). Harder flags are worth more.</Li>
-        <Li><b className="t-fg">Fair play.</b> Only the NEXORA website and the files it serves are in scope. Do not attack this platform, the other teams, or anyone's accounts.</Li>
+        <Li><b className="t-fg">3 hours.</b> The clock at the top is your team's timer. Every team starts together.</Li>
+        <Li><b className="t-fg">One device per team.</b> Your whole team shares the logged-in laptop. Logging in on another device needs organizer approval and logs this one out.</Li>
+        <Li><b className="t-fg">In order.</b> Flags unlock one after another, 1 to 11. If you get stuck, ask a proctor for a hint.</Li>
+        <Li><b className="t-fg">Points drop over time.</b> A flag is worth more the sooner you solve it; the "~pts" on each card shows what it is worth right now. Harder flags are worth more.</Li>
+        <Li><b className="t-fg">Fair play.</b> Only the NEXORA website and the files it serves are in scope. Do not attack this platform, other teams, or anyone's accounts.</Li>
       </ul>
     ),
   },
   {
     icon: Globe,
-    title: "Step 1: open the challenge website",
+    title: "Step 1: open the website and your browser's tools",
     body: (
       <>
-        <p>Click <b className="t-fg">Open challenge site</b> on your dashboard. It opens the NEXORA company website in a new tab.</p>
-        <p>Look at the small badge at the bottom-left of that site. It must say <b className="t-ok">"Team linked"</b>. That means the website knows which team you are, so flags you find are credited to you <b className="t-fg">automatically</b>.</p>
-        <p className="t-muted">If it says "Not linked", close the tab and open the site again from the button here (do not type the address yourself).</p>
-        <p>Explore the site like a normal visitor first: click every page (Home, About, Services, Research, Projects, Blog, Support, Contact, Gallery). Then start digging <i>under</i> the pages.</p>
+        <ol className="space-y-2 list-decimal pl-5">
+          <li>Click <b className="t-fg">Open challenge site</b> on your dashboard. The company website opens in a new tab.</li>
+          <li>Check the small badge at the bottom-left: it must say <b className="t-ok">"Team linked"</b>. If not, close the tab and use the button again.</li>
+          <li>Click around like a normal visitor: every menu item, every page. Note anything odd or unfinished.</li>
+          <li>Now look <i>under</i> the page. Press <Code>F12</Code> (or right-click anything and choose <b className="t-fg">Inspect</b>). A panel opens with tabs. You only need to learn a few of them (next steps).</li>
+          <li>Inside that panel press <Code>Ctrl+F</Code> to search the page's code for a word.</li>
+        </ol>
+        <p className="t-muted">Think of a web page like a house: the screen shows the rooms, but the blueprints, wiring and storage are all readable too.</p>
       </>
     ),
   },
   {
     icon: Search,
-    title: "Step 2: how to hunt for flags (web)",
+    title: "Try it: a practice search",
     body: (
       <>
-        <p>Websites contain much more than what you see on screen. Your browser has built-in tools to look behind the scenes:</p>
+        <p>Let's practise right now, on this very paragraph. <span data-practice-word="swordfish" className="t-fg font-semibold">This sentence has a secret word hiding in its code.</span></p>
+        <ol className="space-y-2 list-decimal pl-5">
+          <li>Right-click the bold sentence above and choose <b className="t-fg">Inspect</b>.</li>
+          <li>The Elements panel highlights the sentence's code. Read the line: it has a "<Code>data-practice-word</Code>" part.</li>
+          <li>The value after the equals sign is the secret word. Found it? You just did your first investigation.</li>
+        </ol>
+        <p className="t-muted">That's the whole idea: what you see on screen is only part of what the page contains. Real flags are better hidden, but the way you look is the same.</p>
+      </>
+    ),
+  },
+  {
+    icon: Wrench,
+    title: "Step 2: read what the website is made of",
+    body: (
+      <>
+        <p>A website is a bundle of files. Your browser can show you all of them:</p>
         <ul className="space-y-2">
-          <Li><b className="t-fg">View Source</b>: press <Code>Ctrl+U</Code>. It shows the raw page text. Press <Code>Ctrl+F</Code> and search for <Code>flag</Code> or <Code>NEXORA</Code>.</Li>
-          <Li><b className="t-fg">DevTools</b>: press <Code>F12</Code>. Tabs to try: <b className="t-fg">Elements</b> (the live page), <b className="t-fg">Console</b> (type commands), <b className="t-fg">Network</b> (every file/data the page loads), <b className="t-fg">Sources</b> (the scripts), <b className="t-fg">Application</b> (stored data).</Li>
-          <Li><b className="t-fg">Hidden pages and files</b>: sites publish <Code>/robots.txt</Code>, <Code>/sitemap.xml</Code> and <Code>/.well-known/security.txt</Code>. Read them; they often mention places that are not linked.</Li>
-          <Li><b className="t-fg">Encoded text</b>: strings that look like random letters (for example ending in <Code>==</Code>) are often <b className="t-fg">Base64</b>. Search "Base64 decode" or use <Code>atob("...")</Code> in the Console.</Li>
+          <Li><b className="t-fg">View Source</b> (<Code>Ctrl+U</Code>) shows the page's raw text, exactly as the server sent it. Use <Code>Ctrl+F</Code> to search it. The <b className="t-fg">Elements</b> tab shows the page <i>after</i> it has finished building itself, which can differ.</Li>
+          <Li><b className="t-fg">Network</b> tab: reload the page and watch a list of every file and piece of data it downloads. Click an item to read what came back. Try using the site's buttons and menus while it is open.</Li>
+          <Li><b className="t-fg">Sources</b> tab: the scripts the page runs. Scripts are just text; read them. Comments in code (lines starting with <Code>//</Code> or inside <Code>&lt;!-- --&gt;</Code>) are notes the developers left behind.</Li>
+          <Li><b className="t-fg">Console</b> tab: a place to run small commands. If a script offers a function, you can call it there.</Li>
+          <Li><b className="t-fg">Application</b> tab: data the page stores in your browser.</Li>
+          <Li><b className="t-fg">Not every file is linked from a menu.</b> Websites often publish files meant for search engines and for security researchers. Search the web for what those files are called and where they live, then type the address into the URL bar yourself.</Li>
         </ul>
-        <p className="t-muted">Flag 1 starts the trail: look at how the <b>About</b> page is built.</p>
+      </>
+    ),
+  },
+  {
+    icon: Search,
+    title: "Step 3: scrambled text is usually just encoded",
+    body: (
+      <>
+        <p>If you find text that looks like nonsense, it is often <b className="t-fg">encoded</b> (written in a different alphabet), not locked away. You can reverse encodings with free tools.</p>
+        <ul className="space-y-2">
+          <Li><b className="t-fg">CyberChef</b> (search for "CyberChef" in your browser, it is a free website): paste the text in the Input box. Its <b className="t-fg">Magic</b> wand tries to guess the encoding for you.</Li>
+          <Li>Letters and numbers ending in <Code>=</Code> or <Code>==</Code> are typically <b className="t-fg">Base64</b>. Lists of numbers like <Code>0x1f, 0x2a</Code> are <b className="t-fg">bytes</b>; each number stands for one character.</Li>
+          <Li>Sometimes the text is scrambled with a simple rule using a number (a "key"). If a script or note mentions a key, try it.</Li>
+          <Li>Always write down where you found something. It may be a piece of a bigger puzzle, and pieces often come from different places.</Li>
+        </ul>
       </>
     ),
   },
   {
     icon: ImageIcon,
-    title: "Step 3: pictures hide secrets too (forensics)",
+    title: "Step 4: pictures can hold secrets too",
     body: (
       <>
-        <p>Later flags are hidden <b className="t-fg">inside images</b> from the website's <b className="t-fg">Gallery</b> page (this is called <i>steganography</i>). Download the images (right-click, Save image) and examine them with these tools:</p>
-        <ul className="space-y-2">
-          <Li><b className="t-fg">Metadata</b>: pictures carry hidden notes. Tool: <Code>exiftool image.png</Code> (or any online "metadata viewer").</Li>
-          <Li><b className="t-fg">Hidden pixel data</b>: messages can live in the tiny colour bits. Tools: <Code>zsteg</Code>, Python <Code>stegano</Code>, or the website <i>StegOnline</i>.</Li>
-          <Li><b className="t-fg">Files inside files</b>: an image can have another file glued on the end. Tools: <Code>binwalk</Code>, or open the image in <b>7-Zip</b>.</Li>
-          <Li><b className="t-fg">Locked payloads</b>: some data needs a passphrase. Tool: <Code>steghide extract -sf image.jpg</Code>. The passphrase is something you will already have found.</Li>
-        </ul>
-        <p className="t-muted">Tip: finding a secret often gives you the key to the next one. Keep notes of everything you find.</p>
+        <p>Hiding information inside images is called <b className="t-fg">steganography</b>. Pictures on the website may carry more than you can see. To investigate one:</p>
+        <ol className="space-y-2 list-decimal pl-5">
+          <li><b className="t-fg">Save the picture</b> to your computer (right-click the image, then Save image as).</li>
+          <li>Check its <b className="t-fg">details</b>: right-click the saved file, then Properties, then Details. Note its file size too: is it bigger than it should be?</li>
+          <li>Try <b className="t-fg">more than one technique</b> on each picture. Different pictures hide things in different ways, and the way is part of the puzzle. Search the web for the names below to learn how each works.</li>
+        </ol>
+        <p className="t-muted">Toolbox: online <i>"image metadata viewer"</i> sites, <b>exiftool</b>, online <i>"steganography decoder"</i> sites (e.g. StegOnline), <b>zsteg</b>, <b>binwalk</b>, <b>7-Zip</b>, <b>steghide</b>. Some tools ask for a passphrase: that is something you will have found earlier, so keep notes.</p>
       </>
     ),
   },
   {
     icon: Send,
-    title: "Step 4: submitting a flag",
+    title: "Step 5: submitting a flag",
     body: (
       <>
         <p>When you find something that looks like <Code>NEXORA&#123;...&#125;</Code>, you have two easy options:</p>
         <ul className="space-y-2">
-          <Li><b className="t-fg">Paste it on the NEXORA website</b> (select it, copy with <Code>Ctrl+C</Code>, then press <Code>Ctrl+V</Code> anywhere on the NEXORA page). The site checks it and shows a green pop-up such as <i>"Flag 3 captured! +198 pts"</i>.</Li>
-          <Li><b className="t-fg">Or type/paste it in the flag's box</b> on this dashboard and press <b className="t-fg">Submit</b>.</Li>
+          <Li><b className="t-fg">Paste it on the NEXORA website</b>: select it, copy with <Code>Ctrl+C</Code>, then press <Code>Ctrl+V</Code> anywhere on the NEXORA tab. A green pop-up such as <i>"Flag 3 captured! +198 pts"</i> confirms it.</Li>
+          <Li><b className="t-fg">Or paste it in the flag's box</b> on this dashboard and press <b className="t-fg">Submit</b>.</Li>
         </ul>
-        <p>Some flags appear on the site by themselves when you do the right thing. Those are credited automatically.</p>
-        <p>Found a flag too early? No problem: it is remembered and credited as soon as the earlier flag is solved. Text that is not a flag is ignored.</p>
-        <p className="t-muted">Wrong guesses on the dashboard boxes are logged, so check the flag before submitting. Copy the whole thing, from <Code>NEXORA&#123;</Code> to <Code>&#125;</Code>, with no spaces.</p>
+        <p>Some flags are credited automatically when you do the right thing on the site. A flag found too early is remembered and credited once the earlier flag is solved. Text that is not a flag is simply ignored.</p>
+        <p className="t-muted">Copy the whole flag, from <Code>NEXORA&#123;</Code> to <Code>&#125;</Code>, with no extra spaces. Wrong guesses typed into the dashboard boxes are logged, so check before submitting.</p>
       </>
     ),
   },
@@ -106,24 +139,25 @@ const STEPS: Step[] = [
     title: "Scoring and finishing",
     body: (
       <ul className="space-y-2">
-        <Li><b className="t-fg">Score</b> = the sum of the points of your solved flags. Flags are <span className="t-accent">Easy</span> (100), <span className="t-warn">Medium</span> (200) and <span className="t-bad">Hard</span> (300) at most, and shrink toward half as time passes.</Li>
-        <Li><b className="t-fg">Ranking</b>: higher score wins. Ties are broken by who finished earlier, then by fewer wrong attempts.</Li>
-        <Li><b className="t-fg">Final submission</b>: when all 11 flags are solved, a gold <b className="t-fg">Submit final results</b> button appears. Press it to lock in your finish time.</Li>
+        <Li><b className="t-fg">Score</b> = the points of the flags you solved: Easy up to 100, Medium up to 200, Hard up to 300, shrinking toward half as time passes.</Li>
+        <Li><b className="t-fg">Ranking</b>: higher score wins. Ties go to whoever finished earlier, then to fewer wrong attempts.</Li>
+        <Li><b className="t-fg">Final submission</b>: once all 11 flags are solved, a gold <b className="t-fg">Submit final results</b> button appears. Press it to lock your finish time.</Li>
         <Li>If the timer runs out, you keep every point you earned.</Li>
-        <Li>The organizer can <b className="t-fg">pause</b> the event (the timer freezes) if there is a problem.</Li>
+        <Li>The organizer may <b className="t-fg">pause</b> the event (the timer freezes) if something goes wrong.</Li>
       </ul>
     ),
   },
   {
-    icon: Wrench,
+    icon: ShieldCheck,
     title: "Stuck? How to get unstuck",
     body: (
       <>
         <ul className="space-y-2">
-          <Li><b className="t-fg">Split up.</b> One person on the website, one on tools, one taking notes.</Li>
-          <Li><b className="t-fg">Re-read what you found.</b> Almost every flag leaves a clue pointing to the next place to look.</Li>
-          <Li><b className="t-fg">Ask a proctor for a hint.</b> They have graded hints from gentle to very direct. Asking is allowed and normal.</Li>
-          <Li><b className="t-fg">Technical trouble</b> (logged out, wrong device, page not loading)? Raise your hand; the organizers can fix sessions quickly.</Li>
+          <Li><b className="t-fg">Split up.</b> One person explores the website, one tries tools, one takes notes.</Li>
+          <Li><b className="t-fg">Re-read what you found.</b> Almost every discovery leaves a clue about what to try next.</Li>
+          <Li><b className="t-fg">Try the boring things</b> you skipped: every page, every file the Network tab shows, every picture.</Li>
+          <Li><b className="t-fg">Ask a proctor for a hint.</b> They have hints from gentle to direct. Asking is allowed and normal.</Li>
+          <Li><b className="t-fg">Technical trouble</b> (logged out, page not loading)? Raise your hand; organizers can fix sessions quickly.</Li>
         </ul>
         <p className="flex items-center gap-2 mt-2"><ShieldCheck className="w-4 h-4 t-ok flex-shrink-0" /> <span>You are ready. Good luck, and have fun!</span></p>
       </>

@@ -422,8 +422,7 @@ export function StudentDashboard() {
               <li><span className="t-fg2 font-medium">Open it from this button</span>; the badge bottom-left must say "Team linked" so flags are credited automatically.</li>
               <li><span className="t-fg2 font-medium">Scope:</span> the NEXORA site and the files it serves. Nothing else is a target.</li>
               <li><span className="t-fg2 font-medium">Found a flag?</span> It looks like <code>NEXORA&#123;...&#125;</code>. Press Ctrl+V on the NEXORA page, or use the boxes below.</li>
-              <li><span className="t-fg2 font-medium">Start here:</span> flag 1 hides in how the About page is built; try View Source (Ctrl+U) or Inspect (F12) and search for "Flag".</li>
-              <li><span className="t-fg2 font-medium">Tools:</span> DevTools (Network, Console, Application), exiftool, zsteg/stegano, binwalk, steghide.</li>
+              <li><span className="t-fg2 font-medium">New to this?</span> Open the <b>Guide</b> (top right); it teaches the tools step by step.</li>
               <li><span className="t-fg2 font-medium">Stuck?</span> Ask a proctor for a hint. One device per team.</li>
             </ul>
             {!challengeUrl && !isDev && (
