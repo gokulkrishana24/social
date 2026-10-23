@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import {
   LogOut, Clock, Flag, CheckCircle2, Loader2, AlertTriangle,
-  Trophy, Lock, ExternalLink, Globe, Pause, AlertCircle, Sparkles, HelpCircle
+  Trophy, Lock, ExternalLink, Globe, Pause, AlertCircle, Sparkles, HelpCircle, Lightbulb
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useRouter } from "@/lib/router";
@@ -62,6 +62,7 @@ export function StudentDashboard() {
   const [remainingSeconds, setRemainingSeconds] = useState(team?.remaining_seconds ?? 10800);
   const [totalSolved, setTotalSolved] = useState(0);
   const [totalScore, setTotalScore] = useState(0);
+  const [nextHints, setNextHints] = useState<Record<number, string>>({}); // key = flag solved, value = high-level hint for the next one
   const [showFinalConfirm, setShowFinalConfirm] = useState(false);
   const [finalSubmitting, setFinalSubmitting] = useState(false);
   // Guide opens automatically once per login (the session token changes on every login) and on demand via the header button.
@@ -139,6 +140,14 @@ export function StudentDashboard() {
           };
         })
       );
+
+      // High-level pointer toward the next flag, shown under each completed card (served per solved flag only).
+      apiCall("/flags/hints", { session_token: sessionToken }).then((h) => {
+        if (!h.success) return;
+        const map: Record<number, string> = {};
+        ((h.hints as { after_flag: number; hint: string }[]) || []).forEach((x) => { map[x.after_flag] = x.hint; });
+        setNextHints(map);
+      });
 
       setTotalSolved(res.total_solved ?? solvedList.length);
       setTotalScore(res.total_score ?? solvedList.reduce((sum, s) => sum + (s.points_awarded || 0), 0));
@@ -452,6 +461,7 @@ export function StudentDashboard() {
                 key={i}
                 flagNumber={i + 1}
                 flag={flag}
+                nextHint={flags[i + 1] && flags[i + 1].status !== "correct" ? nextHints[i + 1] : undefined}
                 remainingSeconds={remainingSeconds}
                 disabled={submissionsDisabled}
                 onChange={(value) => setFlags((prev) => prev.map((f, idx) => (idx === i ? { ...f, inputValue: value } : f)))}
@@ -514,6 +524,7 @@ export function StudentDashboard() {
 function FlagSlot({
   flagNumber,
   flag,
+  nextHint,
   remainingSeconds,
   disabled,
   onChange,
@@ -521,6 +532,7 @@ function FlagSlot({
 }: {
   flagNumber: number;
   flag: FlagState;
+  nextHint?: string;
   remainingSeconds: number;
   disabled: boolean;
   onChange: (value: string) => void;
@@ -560,10 +572,18 @@ function FlagSlot({
       </div>
 
       {isSolved ? (
+        <>
         <div className="flex items-center justify-between rounded-lg px-3 py-2 text-xs" style={{ background: "var(--ok-bg)" }}>
           <span className="t-ok font-medium">Completed</span>
           <span className="t-muted text-[11px] font-mono">{flag.solvedAt ? new Date(flag.solvedAt).toLocaleTimeString() : "Verified"}</span>
         </div>
+        {nextHint && (
+          <div className="mt-2 flex gap-2 rounded-lg px-3 py-2 text-xs t-fg2 leading-relaxed" style={{ background: "var(--info-bg)" }}>
+            <Lightbulb className="w-4 h-4 t-accent flex-shrink-0 mt-0.5" />
+            <span><span className="font-semibold t-accent">Next flag, where to start: </span>{nextHint}</span>
+          </div>
+        )}
+        </>
       ) : isLocked ? (
         <div className="flex items-center gap-2 text-xs t-muted rounded-lg p-3 border t-line">
           <Lock className="w-4 h-4 flex-shrink-0" />
