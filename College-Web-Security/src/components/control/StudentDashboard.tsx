@@ -462,6 +462,7 @@ export function StudentDashboard() {
                 flagNumber={i + 1}
                 flag={flag}
                 nextHint={flags[i + 1] && flags[i + 1].status !== "correct" ? nextHints[i + 1] : undefined}
+                direction={nextHints[i]}
                 remainingSeconds={remainingSeconds}
                 disabled={submissionsDisabled}
                 onChange={(value) => setFlags((prev) => prev.map((f, idx) => (idx === i ? { ...f, inputValue: value } : f)))}
@@ -525,6 +526,7 @@ function FlagSlot({
   flagNumber,
   flag,
   nextHint,
+  direction,
   remainingSeconds,
   disabled,
   onChange,
@@ -533,6 +535,7 @@ function FlagSlot({
   flagNumber: number;
   flag: FlagState;
   nextHint?: string;
+  direction?: string; // high-level pointer for THIS flag, shown on the open card
   remainingSeconds: number;
   disabled: boolean;
   onChange: (value: string) => void;
@@ -591,6 +594,12 @@ function FlagSlot({
         </div>
       ) : (
         <>
+          {direction && (
+            <div className="mb-3 flex gap-2 rounded-lg px-3 py-2 text-xs t-fg2 leading-relaxed" style={{ background: "var(--info-bg)" }}>
+              <Lightbulb className="w-4 h-4 t-accent flex-shrink-0 mt-0.5" />
+              <span><span className="font-semibold t-accent">Direction: </span>{direction}</span>
+            </div>
+          )}
           <div className="flex gap-2">
             <input
               type="text"
